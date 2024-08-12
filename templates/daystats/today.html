@@ -17,6 +17,11 @@
       {% endif %}
     </h1>
     <h5 class="text-center">{{ date }}</h5>
+    {% if request.resolver_match.view_name == 'daystats:daystats' %}
+      <div class="text-center">
+        <a class="text-decoration-none" href="{% url 'daystats:today' %}">Вернуться на сегодня</a>
+      </div>
+    {% endif %}
   </div>
   {% if form.errors %}
     <div class="alert alert-danger">
@@ -70,7 +75,19 @@
       </div>
     </div>
     <div class="text-center">
-      <button class="btn btn-primary" type="submit">Сохранить</button>
+      <button class="btn btn-primary mb-3" type="submit">Сохранить</button>
     </div>
   </form>
+  <div class="row">
+    <div class="col-md-6 text-center pb-3">
+      <a class="text-decoration-none"
+         href="{% url 'daystats:daystats' date=yesterday %}">&lt;&lt; {{ yesterday }}</a>
+    </div>
+    <div class="col-md-6 text-center pb-3">
+      {% if tomorrow %}
+        <a class="text-decoration-none"
+           href="{% url 'daystats:daystats' date=tomorrow %}">{{ tomorrow }} &gt;&gt;</a>
+      {% endif %}
+    </div>
+  </div>
 {% endblock content %}

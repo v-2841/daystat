@@ -11,6 +11,8 @@ from daystats.models import Daystat
 def today(request, date=None):
     if date:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        if date == datetime.date.today():
+            return redirect('daystats:today')
     else:
         date = datetime.date.today()
     daystat, _ = Daystat.objects.get_or_create(
@@ -35,7 +37,7 @@ def today(request, date=None):
     last_period = Daystat.objects.filter(
         user=request.user,
         period_start=True,
-        date__lt=date,
+        date__lte=date,
     ).order_by('-date').first()
     if last_period:
         period_day = (date - last_period.date).days + 1
@@ -44,6 +46,9 @@ def today(request, date=None):
 
     context = {
         'date': date,
+        'yesterday': date - datetime.timedelta(days=1),
+        'tomorrow': (date + datetime.timedelta(days=1)
+                     if date != datetime.date.today() else ''),
         'daystat': daystat,
         'form': form,
         'period_day': period_day,
