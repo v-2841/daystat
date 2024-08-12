@@ -3,6 +3,8 @@ from django.contrib.auth.views import (LoginView, LogoutView,
                                        PasswordChangeView)
 from django.urls import path
 
+from users import views
+
 
 app_name = 'users'
 urlpatterns = [
@@ -29,5 +31,6 @@ urlpatterns = [
             template_name='users/password_change_done.html'
         ),
         name='password_change_done'
-    )
+    ),
+    path('profile_edit/', views.profile_edit, name='profile_edit'),
 ]

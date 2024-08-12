@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'core.apps.CoreConfig',
     'daystats.apps.DaystatsConfig',
     'users.apps.UsersConfig',
@@ -34,6 +35,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'daystat.urls'
@@ -95,4 +97,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [i.strip() for i in os.getenv('CSRF_TRUSTED_ORIGINS', '127.0.0.1, localhost').split(',')]
 
 LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'daystats:profile'
+LOGIN_REDIRECT_URL = 'daystats:today'
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]

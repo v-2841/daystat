@@ -1,6 +1,20 @@
-<div class="text-center text-dark p-3">
-  © {{ year }} Copyright: Vitaliy Pavlov
-  <br />
-  Icons by
-  <a href="https://icons8.com" target="_blank" class="text-dark">Icons8</a>
+<div class="text-center text-dark p-2">
+  {% if request.user.is_authenticated %}
+    <div class="pb-3">
+      <a href="{% url 'users:profile_edit' %}" class="btn text-secondary">Редактировать профиль</a>
+      <br />
+      <a href="{% url 'users:password_change_form' %}"
+         class="btn text-secondary">Изменить пароль</a>
+      <form method="post" action="{% url 'users:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn text-secondary">Выход</button>
+      </form>
+    </div>
+  {% endif %}
+  <small>
+    © {{ year }} Copyright: Vitaliy Pavlov
+    <br />
+    Icons by
+    <a href="https://icons8.com" target="_blank" class="text-dark">Icons8</a>
+  </small>
 </div>

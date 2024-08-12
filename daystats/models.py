@@ -16,11 +16,18 @@ class Daystat(models.Model):
     date = models.DateField(
         verbose_name='Дата',
     )
+    week = models.PositiveSmallIntegerField(
+        editable=False,
+        validators=[
+            MaxValueValidator(53),
+        ],
+        verbose_name='Неделя',
+    )
     calories = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         validators=[
-            MaxValueValidator(10000),
+            MaxValueValidator(5000),
         ],
         verbose_name='Количество калорий, ккал',
     )
@@ -28,14 +35,14 @@ class Daystat(models.Model):
         null=True,
         blank=True,
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(500),
+            MinValueValidator(0),
+            MaxValueValidator(250),
         ],
         verbose_name='Вес, кг',
     )
     period_start = models.BooleanField(
         default=False,
-        verbose_name='Начало месячных',
+        verbose_name='Начало цикла',
     )
     updated_at = models.DateTimeField(
         auto_now=True,
@@ -55,3 +62,7 @@ class Daystat(models.Model):
 
     def __str__(self):
         return f'{self.user} | {self.date}'
+
+    def save(self, *args, **kwargs):
+        self.week = self.date.isocalendar().week
+        super().save(*args, **kwargs)

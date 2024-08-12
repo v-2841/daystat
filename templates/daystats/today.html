@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load user_filters %}
+{% block title %}
+  {% if request.resolver_match.view_name == 'daystats:today' %}
+    Привет, {{ user.first_name }}
+  {% else %}
+    {{ date }}
+  {% endif %}
+{% endblock title %}
+{% block content %}
+  <div class="py-md-5 py-3">
+    <h1 class="text-center">
+      {% if request.resolver_match.view_name == 'daystats:today' %}
+        Привет, {{ user.first_name }}
+      {% else %}
+        Архив
+      {% endif %}
+    </h1>
+    <h5 class="text-center">{{ date }}</h5>
+  </div>
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      {% for field in form %}
+        {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
+    </div>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-4 pb-3">
+        <div class="card">
+          <div class="card-header text-center">День цикла</div>
+          <div class="card-body text-center">{{ period_day }}</div>
+          <div class="card-footer text-center">
+            <label class="form-check-label">Начало цикла</label>
+            <input class="form-check-input mx-2"
+                   type="checkbox"
+                   name="period_start"
+                   {% if form.period_start.value %}checked{% endif %}>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 pb-3">
+        <div class="card">
+          <div class="card-header text-center">Вес</div>
+          <div class="card-body text-center">
+            {% if daystat.weight %}
+              {{ daystat.weight }} кг
+            {% else %}
+              -
+            {% endif %}
+          </div>
+          <div class="card-footer text-center">{{ form.weight|addclass:"form-control" }}</div>
+        </div>
+      </div>
+      <div class="col-md-4 pb-3">
+        <div class="card">
+          <div class="card-header text-center">Калории</div>
+          <div class="card-body text-center">
+            {% if daystat.calories %}
+              {{ daystat.calories }} ккал
+            {% else %}
+              -
+            {% endif %}
+          </div>
+          <div class="card-footer text-center">{{ form.calories|addclass:"form-control" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center">
+      <button class="btn btn-primary" type="submit">Сохранить</button>
+    </div>
+  </form>
+{% endblock content %}
