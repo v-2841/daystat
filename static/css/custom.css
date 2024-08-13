@@ -87,8 +87,11 @@ a {
   border-color: #af649f;
 }
 
+
 .card-header {
   background-color: #af649f;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
 }
 
 .card-header-fix {
@@ -97,10 +100,14 @@ a {
 
 .card-body {
   background-color: #fdc3f5;
+  border-bottom-left-radius: 0.325rem;
+  border-bottom-right-radius: 0.325rem;
 }
 
 .card-body-fix {
   height: 56px;
+  border-bottom-left-radius: 0rem !important;
+  border-bottom-right-radius: 0rem !important;
 }
 
 .card-footer {
