@@ -9,51 +9,51 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 {% endblock extrahead %}
 {% block content %}
-  <div class="btn-group" role="group" aria-label="Выбор параметра">
+  <div class="btn-group mb-2" role="group" aria-label="Выбор параметра">
     <input type="radio"
            class="btn-check"
            name="type"
            id="weightButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="weightButton">Вес</label>
+    <label class="btn btn-outline-pink" for="weightButton">Вес</label>
     <input type="radio"
            class="btn-check"
            name="type"
            id="caloriesButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="caloriesButton">Калории</label>
+    <label class="btn btn-outline-pink" for="caloriesButton">Калории</label>
   </div>
-  <div class="btn-group" role="group" aria-label="Выбор периода">
+  <div class="btn-group mb-2" role="group" aria-label="Выбор периода">
     <input type="radio"
            class="btn-check"
            name="range"
            id="weekButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="weekButton">Неделя</label>
+    <label class="btn btn-outline-pink" for="weekButton">Неделя</label>
     <input type="radio"
            class="btn-check"
            name="range"
            id="monthButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="monthButton">Месяц</label>
+    <label class="btn btn-outline-pink" for="monthButton">Месяц</label>
     <input type="radio"
            class="btn-check"
            name="range"
            id="6monthsButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="6monthsButton">6 месяцев</label>
+    <label class="btn btn-outline-pink" for="6monthsButton">6 месяцев</label>
     <input type="radio"
            class="btn-check"
            name="range"
            id="yearButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="yearButton">Год</label>
+    <label class="btn btn-outline-pink" for="yearButton">Год</label>
     <input type="radio"
            class="btn-check"
            name="range"
            id="5yearButton"
            autocomplete="off">
-    <label class="btn btn-outline-primary" for="5yearButton">5 лет</label>
+    <label class="btn btn-outline-pink" for="5yearButton">5 лет</label>
   </div>
   <div class="mt-2">
     <canvas id="myChart"></canvas>

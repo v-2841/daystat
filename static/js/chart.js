@@ -1,4 +1,5 @@
 moment.locale("ru");
+Chart.defaults.color = "#991a7d";
 
 document.addEventListener("DOMContentLoaded", function () {
   const typeButtons = document.querySelectorAll('input[name="type"]');
@@ -18,6 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
       ],
     },
     options: {
+      elements: {
+        line: {
+          borderColor: "#991a7d",
+        },
+      },
       plugins: {
         legend: {
           display: false,

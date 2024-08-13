@@ -86,14 +86,14 @@ def calendar_api(request):
             data.append({
                 'start': daystat.date.strftime('%Y-%m-%d'),
                 'title': 'Цикл',
-                'backgroundColor': 'rgba(255, 0, 255, 0.2)',
-                'borderColor': 'rgba(255, 0, 255, 1)',
+                'backgroundColor': 'rgba(255, 0, 0, 0.2)',
+                'borderColor': 'rgba(255, 0, 0, 1)',
             })
         data.append({
             'start': daystat.date.strftime('%Y-%m-%d'),
             'title': f'{daystat.weight if daystat.weight else "-"}',
-            'backgroundColor': 'rgba(255, 0, 0, 0.2)',
-            'borderColor': 'rgba(255, 0, 0, 1)',
+            'backgroundColor': 'rgba(255, 0, 255, 0.2)',
+            'borderColor': 'rgba(255, 0, 255, 1)',
         })
         data.append({
             'start': daystat.date.strftime('%Y-%m-%d'),
