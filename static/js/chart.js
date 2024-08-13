@@ -44,7 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
         y: {
           title: {
             display: true,
-            text: "Значение",
           },
         },
       },

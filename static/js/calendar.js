@@ -28,4 +28,21 @@ document.addEventListener("DOMContentLoaded", function () {
     events: "/calendar_api/",
   });
   calendar.render();
+
+  var hammer = new Hammer(calendarEl);
+  hammer.get("pan").set({
+    direction: Hammer.DIRECTION_ALL,
+    threshold: 50,
+    velocity: 0.3,
+  });
+
+  hammer.on("pan", function (ev) {
+    if (ev.isFinal) {
+      if (ev.velocityX > 0) {
+        calendar.prev();
+      } else if (ev.velocityX < 0) {
+        calendar.next();
+      }
+    }
+  });
 });

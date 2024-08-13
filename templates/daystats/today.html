@@ -17,11 +17,11 @@
       {% endif %}
     </h1>
     <h5 class="text-center">{{ date }}</h5>
-    {% if request.resolver_match.view_name == 'daystats:daystats' %}
+    {% comment %} {% if request.resolver_match.view_name == 'daystats:daystats' %}
       <div class="text-center">
         <a class="text-decoration-none" href="{% url 'daystats:today' %}">Вернуться на сегодня</a>
       </div>
-    {% endif %}
+    {% endif %} {% endcomment %}
   </div>
   {% if form.errors %}
     <div class="alert alert-danger">
@@ -89,5 +89,8 @@
            href="{% url 'daystats:daystats' date=tomorrow %}">{{ tomorrow }} &gt;&gt;</a>
       {% endif %}
     </div>
+  </div>
+  <div class="text-center">
+    <image src="/static/img/cat.png" alt="cat" height="192px">
   </div>
 {% endblock content %}

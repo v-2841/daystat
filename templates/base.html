@@ -4,10 +4,26 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link type="image/png"
-          sizes="50x50"
-          rel="icon"
-          href="https://img.icons8.com/ios/50/statistics.png">
+    <link rel="apple-touch-icon"
+          sizes="180x180"
+          href="{% static 'img/apple-touch-icon.png' %}">
+    <link rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="{% static 'img/favicon-32x32.png' %}">
+    <link rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="{% static 'img/favicon-16x16.png' %}">
+    <link rel="manifest" href={% static 'img/site.webmanifest' %}>
+    <link rel="mask-icon"
+          href="{% static 'img/safari-pinned-tab.svg' %}"
+          color="#fdc3f5">
+    <link rel="shortcut icon" href={% static 'img/favicon.ico' %}>
+    <meta name="msapplication-TileColor" content="#fdc3f5">
+    <meta name="msapplication-config"
+          content="{% static 'img/browserconfig.xml' %}">
+    <meta name="theme-color" content="#fdc3f5">
     <title>
       {% block title %}
         Место для заголовка
