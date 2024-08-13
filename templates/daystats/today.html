@@ -36,9 +36,9 @@
     <div class="row">
       <div class="col-md-4 pb-3">
         <div class="card">
-          <div class="card-header text-center">День цикла</div>
-          <div class="card-body text-center">{{ period_day }}</div>
-          <div class="card-footer text-center">
+          <div class="card-header card-header-fix text-center">День цикла</div>
+          <div class="card-body card-body-fix text-center">{{ period_day }}</div>
+          <div class="card-footer card-footer-fix text-center">
             <label class="form-check-label">Начало цикла</label>
             <input class="form-check-input mx-2"
                    type="checkbox"
@@ -49,28 +49,28 @@
       </div>
       <div class="col-md-4 pb-3">
         <div class="card">
-          <div class="card-header text-center">Вес</div>
-          <div class="card-body text-center">
+          <div class="card-header card-header-fix text-center">Вес</div>
+          <div class="card-body card-body-fix text-center">
             {% if daystat.weight %}
               {{ daystat.weight }} кг
             {% else %}
               -
             {% endif %}
           </div>
-          <div class="card-footer text-center">{{ form.weight|addclass:"form-control" }}</div>
+          <div class="card-footer card-footer-fix text-center">{{ form.weight|addclass:"form-control" }}</div>
         </div>
       </div>
       <div class="col-md-4 pb-3">
         <div class="card">
-          <div class="card-header text-center">Калории</div>
-          <div class="card-body text-center">
+          <div class="card-header card-header-fix text-center">Калории</div>
+          <div class="card-body card-body-fix text-center">
             {% if daystat.calories %}
               {{ daystat.calories }} ккал
             {% else %}
               -
             {% endif %}
           </div>
-          <div class="card-footer text-center">{{ form.calories|addclass:"form-control" }}</div>
+          <div class="card-footer card-footer-fix text-center">{{ form.calories|addclass:"form-control" }}</div>
         </div>
       </div>
     </div>

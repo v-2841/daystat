@@ -89,18 +89,27 @@ a {
 
 .card-header {
   background-color: #af649f;
+}
+
+.card-header-fix {
   height: 41px;
 }
 
 .card-body {
   background-color: #fdc3f5;
+}
+
+.card-body-fix {
   height: 56px;
 }
 
 .card-footer {
   background-color: #af649f;
-  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.card-footer-fix {
+  height: 55px;
 }
