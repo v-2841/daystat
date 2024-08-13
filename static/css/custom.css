@@ -13,3 +13,8 @@ footer {
 input[type="checkbox"] {
   transform: scale(1.5);
 }
+
+a.fc-col-header-cell-cushion {
+  text-decoration: none;
+  color: #212529;
+}
