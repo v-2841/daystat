@@ -1,0 +1,26 @@
+name: Upload DayStat to server
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd ${{ secrets.PROJECT_FOLDER }}
+            git pull
+            poetry install
+            poetry run python manage.py migrate
+            poetry run python manage.py collectstatic --noinput
+            systemctl restart ${{ secrets.SERVICE_NAME }}
+            systemctl status ${{ secrets.SERVICE_NAME }}
