@@ -2,7 +2,7 @@ name: Upload DayStat to server
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
