@@ -17,11 +17,6 @@
       {% endif %}
     </h1>
     <h5 class="text-center">{{ date }}</h5>
-    {% comment %} {% if request.resolver_match.view_name == 'daystats:daystats' %}
-      <div class="text-center">
-        <a class="text-decoration-none" href="{% url 'daystats:today' %}">Вернуться на сегодня</a>
-      </div>
-    {% endif %} {% endcomment %}
   </div>
   {% if form.errors %}
     <div class="alert alert-danger">

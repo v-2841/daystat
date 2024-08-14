@@ -1,4 +1,6 @@
 :root {
+  --bs-body-bg: #fdc3f5;
+  --bs-border-color: #af649f;
   --fc-border-color: #af649f;
   --fc-daygrid-event-dot-width: 5px;
   --fc-button-bg-color: #991a7d;
@@ -13,10 +15,6 @@ header {
   background-color: #af649f;
 }
 
-body {
-  background-color: #fdc3f5;
-}
-
 main {
   max-width: 1080px;
 }
@@ -25,24 +23,17 @@ footer {
   background-color: #af649f;
 }
 
+a {
+  color: #991a7d;
+}
+
 input[type="checkbox"] {
   transform: scale(1.5);
 }
 
-.form-control {
-  background-color: #fdc3f5;
-  border-color: #af649f;
-}
-
 .form-control:focus {
-  background-color: #fdc3f5;
   border-color: #af649f;
   box-shadow: 0 0 0 0.25rem rgba(153, 26, 125, 0.25);
-}
-
-.form-check-input {
-  background-color: #fdc3f5;
-  border-color: #af649f;
 }
 
 .form-check-input:checked {
@@ -51,12 +42,8 @@ input[type="checkbox"] {
 }
 
 .form-check-input:focus {
-  box-shadow: 0 0 0 0.25rem rgba(153, 26, 125, 0.25);
   border-color: #af649f;
-}
-
-a {
-  color: #991a7d;
+  box-shadow: 0 0 0 0.25rem rgba(153, 26, 125, 0.25);
 }
 
 .btn-pink {
@@ -84,39 +71,21 @@ a {
 }
 
 .card {
-  border-color: #af649f;
-}
-
-
-.card-header {
-  background-color: #af649f;
-  border-top-left-radius: 0.375rem;
-  border-top-right-radius: 0.375rem;
+  --bs-card-cap-bg: #af649f;
+  --bs-card-border-color: #af649f;
 }
 
 .card-header-fix {
   height: 41px;
 }
 
-.card-body {
-  background-color: #fdc3f5;
-  border-bottom-left-radius: 0.325rem;
-  border-bottom-right-radius: 0.325rem;
-}
-
 .card-body-fix {
   height: 56px;
-  border-bottom-left-radius: 0rem !important;
-  border-bottom-right-radius: 0rem !important;
-}
-
-.card-footer {
-  background-color: #af649f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .card-footer-fix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 55px;
 }

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load user_filters %}
+{% block title %}
+  Будущее неизвестно...
+{% endblock title %}
+{% block content %}
+  <div class="text-center py-md-5 py-3">
+    <h1>Будущее неизвестно...</h1>
+    <h5>{{ date }}</h5>
+    <a href="{% url 'daystats:today' %}">Вернуться на главную</a>
+  </div>
+  <div class="text-center">
+    <image src="/static/img/cat.png" alt="cat" height="192px">
+  </div>
+{% endblock content %}

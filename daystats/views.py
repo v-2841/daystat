@@ -23,8 +23,14 @@ def today(request, date=None):
         date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
         if date == datetime.date.today():
             return redirect('daystats:today')
+        elif date > datetime.date.today():
+            context = {
+                'date': date,
+            }
+            return render(request, 'daystats/future_day.html', context)
     else:
         date = datetime.date.today()
+
     daystat, _ = Daystat.objects.get_or_create(
         user=request.user,
         date=date,
@@ -43,7 +49,6 @@ def today(request, date=None):
     else:
         form = DaystatForm(instance=daystat)
 
-    # День цикла
     last_period = Daystat.objects.filter(
         user=request.user,
         period_start=True,
