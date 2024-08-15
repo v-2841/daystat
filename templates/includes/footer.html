@@ -3,18 +3,12 @@
     <div class="pb-3">
       <a href="{% url 'users:profile_edit' %}" class="btn text-light">Редактировать профиль</a>
       <br />
-      <a href="{% url 'users:password_change_form' %}"
-         class="btn text-light">Изменить пароль</a>
+      <a href="{% url 'users:password_change_form' %}" class="btn text-light">Изменить пароль</a>
       <form method="post" action="{% url 'users:logout' %}">
         {% csrf_token %}
         <button type="submit" class="btn text-light">Выход</button>
       </form>
     </div>
   {% endif %}
-  <small class="text-light">
-    © {{ year }} Copyright: Vitaliy Pavlov
-    <br />
-    Icons by
-    <a href="https://icons8.com" target="_blank" class="text-light">Icons8</a>
-  </small>
+  <small class="text-light">© {{ year }} Copyright: <a class="text-light" href="https://pavva.org">Vitaliy Pavlov</a></small>
 </div>
