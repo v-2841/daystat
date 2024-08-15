@@ -1,8 +1,11 @@
 import datetime
+from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg
+from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 
 from daystats.forms import DaystatForm
 from daystats.models import Daystat
@@ -137,3 +140,33 @@ def chart_api(request, type, range):
             dataset['data'].append(
                 [daystat.date.strftime('%Y-%m-%d'), daystat.calories])
     return JsonResponse(dataset)
+
+
+@login_required
+def calories_summary(request):
+    weekly_avg_calories = (
+        Daystat.objects
+        .filter(
+            user=request.user,
+            calories__gt=0,
+        )
+        .annotate(
+            year=ExtractYear('date'),
+        )
+        .values('year', 'week')
+        .annotate(avg_calories=Avg('calories'))
+        .order_by('-year', '-week')
+    )
+
+    data = defaultdict(lambda: defaultdict(dict))
+    for entry in weekly_avg_calories:
+        year = entry['year']
+        week = entry['week']
+        avg_calories = entry['avg_calories']
+        data[year][week] = {'avg_calories': avg_calories}
+    data = {year: dict(weeks) for year, weeks in data.items()}
+
+    context = {
+        'data': data,
+    }
+    return render(request, 'daystats/calories_summary.html', context)

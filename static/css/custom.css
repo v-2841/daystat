@@ -89,3 +89,7 @@ input[type="checkbox"] {
   justify-content: center;
   height: 55px;
 }
+
+.cat-loading {
+  color: #991a7d;
+}

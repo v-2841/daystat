@@ -1,0 +1,19 @@
+let catButton = document.getElementById("cat-button");
+let catLoading = document.getElementById("cat-loading");
+let catImage = document.getElementById("cat-image");
+const urls = ["https://cataas.com/cat/gif", "https://cataas.com/cat"];
+
+catButton.addEventListener("click", () => {
+  catButton.classList.add("d-none");
+  catLoading.classList.remove("d-none");
+  fetch(urls[Math.floor(Math.random() * urls.length)])
+    .then((response) => response.blob())
+    .then((blob) => {
+      catImage.src = URL.createObjectURL(blob);
+    })
+    .then(() => {
+      catLoading.classList.add("d-none");
+      catImage.classList.remove("d-none");
+    })
+    .catch((error) => console.error("Ошибка загрузки:", error));
+});

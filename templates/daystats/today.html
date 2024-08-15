@@ -8,15 +8,16 @@
   {% endif %}
 {% endblock title %}
 {% block content %}
-  <div class="py-md-5 py-3">
-    <h1 class="text-center">
+  <div class="text-center py-md-5 py-3">
+    <h1>
       {% if request.resolver_match.view_name == 'daystats:today' %}
         Привет, {{ user.first_name }}
       {% else %}
         Архив
       {% endif %}
     </h1>
-    <h5 class="text-center">{{ date }}</h5>
+    <h5>{{ date }}</h5>
+    <image src="/static/img/cat.png" alt="cat" height="192px">
   </div>
   {% if form.errors %}
     <div class="alert alert-danger">
@@ -84,8 +85,5 @@
            href="{% url 'daystats:daystats' date=tomorrow %}">{{ tomorrow }} &gt;&gt;</a>
       {% endif %}
     </div>
-  </div>
-  <div class="text-center">
-    <image src="/static/img/cat.png" alt="cat" height="192px">
   </div>
 {% endblock content %}

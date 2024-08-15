@@ -64,5 +64,5 @@ class Daystat(models.Model):
         return f'{self.user} | {self.date}'
 
     def save(self, *args, **kwargs):
-        self.week = self.date.isocalendar().week
+        self.week = int(self.date.strftime('%W'))
         super().save(*args, **kwargs)

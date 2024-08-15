@@ -1,18 +1,7 @@
-<div class="text-center m-4 d-none" id="cat-container">
-  <image id="cat-image" height="192px">
+{% load static %}
+<div class="text-center my-4" id="cat-container">
+  <button class="btn btn-outline-pink" id="cat-button">Хочу котика!</button>
+  <p class="d-none cat-loading" id="cat-loading">Загрузка...</p>
+  <image class="d-none" id="cat-image" width="300px">
 </div>
-<script>
-  let catContainer = document.getElementById("cat-container");
-  let image = document.getElementById("cat-image");
-  const urls = [
-    "https://cataas.com/cat/gif",
-    "https://cataas.com/cat"
-  ];
-  const randomUrl = urls[Math.floor(Math.random() * urls.length)];
-  fetch(randomUrl)
-    .then(response => response.blob())
-    .then(blob => {
-      image.src = URL.createObjectURL(blob);
-    })
-    .then(() => catContainer.classList.remove("d-none"));
-</script>
+<script src="{% static 'js/cat.js' %}"></script>
