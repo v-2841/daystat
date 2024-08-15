@@ -160,10 +160,8 @@ def calories_summary(request):
 
     data = defaultdict(lambda: defaultdict(dict))
     for entry in weekly_avg_calories:
-        year = entry['year']
-        week = entry['week']
-        avg_calories = entry['avg_calories']
-        data[year][week] = {'avg_calories': avg_calories}
+        data[entry['year']][entry['week']] = {
+            'avg_calories': entry['avg_calories']}
     data = {year: dict(weeks) for year, weeks in data.items()}
 
     context = {
