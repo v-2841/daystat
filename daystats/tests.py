@@ -29,7 +29,7 @@ class DaystatTests(TestCase):
         self.assertTemplateUsed(response, 'daystats/today.html')
         self.assertContains(response, '2000')
         self.assertContains(response, '70.5')
-        self.assertContains(response, 'undavg')  # Цикл начался
+        self.assertContains(response, 'checked')  # Цикл начался
 
     def test_daystat_creation(self):
         """Корректное создание объекта Daystat с заданными данными"""
