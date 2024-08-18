@@ -7,8 +7,8 @@ from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
-from daystats.forms import DaystatForm
-from daystats.models import Daystat
+from daystats.forms import DaystatForm, ExpenseForm
+from daystats.models import Daystat, Expense
 
 
 DATE_RANGE = {
@@ -168,3 +168,22 @@ def calories_summary(request):
         'data': data,
     }
     return render(request, 'daystats/calories_summary.html', context)
+
+
+@login_required
+def expenses(request):
+    last_week_expenses = Expense.objects.filter(
+        user=request.user,
+        created_at__gte=datetime.datetime.now() - DATE_RANGE['week'],
+    ).order_by('-created_at')
+    form = ExpenseForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        expense = form.save(commit=False)
+        expense.user = request.user
+        expense.save()
+        return redirect('daystats:expenses')
+    context = {
+        'last_week_expenses': last_week_expenses,
+        'form': form,
+    }
+    return render(request, 'daystats/expenses.html', context)

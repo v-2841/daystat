@@ -1,9 +1,11 @@
+import locale
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 
+locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent

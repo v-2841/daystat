@@ -12,5 +12,6 @@ urlpatterns = [
          views.chart_api, name='chart_api'),
     path('chart/', views.chart, name='chart'),
     path('calories_summary/', views.calories_summary, name='calories_summary'),
+    path('expenses/', views.expenses, name='expenses'),
     path('', views.today, name='today'),
 ]

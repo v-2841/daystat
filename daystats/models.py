@@ -44,10 +44,6 @@ class Daystat(models.Model):
         default=False,
         verbose_name='Начало цикла',
     )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Время обновления',
-    )
 
     class Meta:
         ordering = ['-date', 'user']
@@ -61,8 +57,44 @@ class Daystat(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user} | {self.date}'
+        return f'{self.user} | {self.date.strftime("%d %B %Y г.")}'
 
     def save(self, *args, **kwargs):
         self.week = int(self.date.strftime('%W'))
         super().save(*args, **kwargs)
+
+
+class Expense(models.Model):
+    value = models.PositiveIntegerField(
+        verbose_name='Сумма',
+    )
+    note = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        verbose_name='Примечание',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='expenses',
+        verbose_name='Пользователь',
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Время создания',
+    )
+
+    class Meta:
+        ordering = ['-created_at', 'user']
+        verbose_name = 'Расход'
+        verbose_name_plural = 'Расходы'
+
+    def __str__(self):
+        return f'{self.user} | {self.created_at.strftime("%d %B %Y г.")}'
+
+    @property
+    def date(self):
+        return self.created_at.strftime("%d %B %Y г.")
+
+    date.fget.short_description = 'Дата'
