@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from daystats.forms import DaystatForm, ExpenseForm
 from daystats.models import Daystat, Expense
@@ -24,16 +25,15 @@ DATE_RANGE = {
 def today(request, date=None):
     if date:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
-        if date == datetime.date.today():
+        if date == timezone.localdate():
             return redirect('daystats:today')
-        elif date > datetime.date.today():
+        elif date > timezone.localdate():
             context = {
                 'date': date,
             }
             return render(request, 'daystats/future_day.html', context)
     else:
-        date = datetime.date.today()
-
+        date = timezone.localdate()
     daystat, _ = Daystat.objects.get_or_create(
         user=request.user,
         date=date,
@@ -66,7 +66,7 @@ def today(request, date=None):
         'date': date,
         'yesterday': date - datetime.timedelta(days=1),
         'tomorrow': (date + datetime.timedelta(days=1)
-                     if date != datetime.date.today() else ''),
+                     if date != timezone.localdate() else ''),
         'daystat': daystat,
         'form': form,
         'period_day': period_day,
@@ -121,7 +121,7 @@ def chart(request):
 def chart_api(request, type, range):
     dataset = {}
     dataset['data'] = []
-    today = datetime.date.today()
+    today = timezone.localdate()
     start = today - DATE_RANGE[range]
     end = today
     daystats = Daystat.objects.filter(
@@ -174,7 +174,7 @@ def calories_summary(request):
 def expenses(request):
     last_week_expenses = Expense.objects.filter(
         user=request.user,
-        created_at__gte=datetime.datetime.now() - DATE_RANGE['week'],
+        created_at__gte=timezone.now() - DATE_RANGE['week'],
     ).order_by('-created_at')
     form = ExpenseForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -187,3 +187,19 @@ def expenses(request):
         'form': form,
     }
     return render(request, 'daystats/expenses.html', context)
+
+
+@login_required
+def expense_edit(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.user != expense.user:
+        return redirect('daystats:expenses')
+    next_page = request.GET.get('next', 'daystats:expenses')
+    form = ExpenseForm(request.POST or None, instance=expense)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect(next_page)
+    context = {
+        'form': form,
+    }
+    return render(request, 'daystats/expense_edit.html', context)

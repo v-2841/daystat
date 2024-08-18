@@ -49,7 +49,8 @@
     </thead>
     <tbody>
       {% for expense in last_week_expenses %}
-        <tr onclick="location.href='{% url 'daystats:today' %}'">
+        <tr id="expense_{{ expense.id }}"
+            onclick="window.location='{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}'">
           <td>{{ expense.created_at|date:"d M Y г." }}</td>
           <td>{{ expense.value }}</td>
           <td>
