@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -81,7 +82,7 @@ class Expense(models.Model):
         verbose_name='Пользователь',
     )
     created_at = models.DateTimeField(
-        auto_now_add=True,
+        default=timezone.now,
         verbose_name='Время создания',
     )
 
@@ -91,10 +92,12 @@ class Expense(models.Model):
         verbose_name_plural = 'Расходы'
 
     def __str__(self):
-        return f'{self.user} | {self.created_at.strftime("%d %B %Y г.")}'
+        local_time = timezone.localtime(self.created_at)
+        return f'{self.user} | {local_time.strftime("%d %B %Y г. %H:%M")}'
 
     @property
-    def date(self):
-        return self.created_at.strftime("%d %B %Y г.")
+    def week(self):
+        local_time = timezone.localtime(self.created_at)
+        return int(local_time.strftime('%W'))
 
-    date.fget.short_description = 'Дата'
+    week.fget.short_description = 'Неделя'

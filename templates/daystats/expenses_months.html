@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}
+  Расходы по месяцам
+{% endblock title %}
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="text-center col-lg-6">
+      <h1 class="pb-3">Расходы по месяцам</h1>
+      {% for year, months in data.items %}
+        <h4 class="py-2">Год: {{ year }}</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Месяц</th>
+              <th>Расходы</th>
+              <th>Примечания</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for month, data in months.items %}
+              <tr>
+                <td>{{ month }}</td>
+                <td>{{ data.avg_values|floatformat:0 }}</td>
+                <td>{{ data.notes }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

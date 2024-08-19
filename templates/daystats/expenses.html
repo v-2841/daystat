@@ -5,7 +5,7 @@
 {% endblock title %}
 {% block content %}
   <h1 class="py-3">Расходы</h1>
-  <div class="row justify-content-center pb-3">
+  <div class="row justify-content-center">
     <div class="col-lg-4">
       <div class="card">
         <div class="card-header text-center text-light">Добавить расход</div>
@@ -33,6 +33,12 @@
               <button type="submit" class="btn btn-pink">Сохранить</button>
             </div>
           </form>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <div class="btn-group w-100" role="group" aria-label="Выбор периода">
+          <a type="button" class="btn btn-outline-pink w-50" href="{% url 'daystats:expenses_weeks' %}">Расходы по неделям</a>
+          <a type="button" class="btn btn-outline-pink w-50" href="{% url 'daystats:expenses_months' %}">Расходы по месяцам</a>
         </div>
       </div>
     </div>

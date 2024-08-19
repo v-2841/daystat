@@ -19,6 +19,20 @@ DATE_RANGE = {
     'year': datetime.timedelta(days=365),
     '5year': datetime.timedelta(days=1825),
 }
+MONTH_NAMES = {
+    1: 'январь',
+    2: 'февраль',
+    3: 'март',
+    4: 'апрель',
+    5: 'май',
+    6: 'июнь',
+    7: 'июль',
+    8: 'август',
+    9: 'сентябрь',
+    10: 'октябрь',
+    11: 'ноябрь',
+    12: 'декабрь',
+}
 
 
 @login_required
@@ -203,3 +217,75 @@ def expense_edit(request, pk):
         'form': form,
     }
     return render(request, 'daystats/expense_edit.html', context)
+
+
+@login_required
+def expenses_weeks(request):
+    expenses = Expense.objects.filter(user=request.user)
+    expenses_list = []
+    for expense in expenses:
+        local_time = timezone.localtime(expense.created_at)
+        expenses_list.append({
+            'year': local_time.year,
+            'week': int(local_time.strftime('%W')),
+            'value': expense.value,
+            'note': expense.note,
+        })
+
+    grouped_data = defaultdict(lambda: defaultdict(list))
+    for expense in expenses_list:
+        grouped_data[expense['year']][expense['week']].append(
+            {'value': expense['value'], 'note': expense['note']})
+    data = {year: dict(weeks) for year, weeks in grouped_data.items()}
+
+    for year, weeks in data.items():
+        for week, expenses in weeks.items():
+            avg_value = sum(
+                [expense['value'] for expense in expenses]) / len(expenses)
+            notes = ', '.join(
+                [expense['note'] for expense in expenses if expense['note']])
+            data[year][week] = {
+                'avg_values': avg_value,
+                'notes': notes,
+            }
+
+    context = {
+        'data': data,
+    }
+    return render(request, 'daystats/expenses_weeks.html', context)
+
+
+@ login_required
+def expenses_months(request):
+    expenses = Expense.objects.filter(user=request.user)
+    expenses_list = []
+    for expense in expenses:
+        local_time = timezone.localtime(expense.created_at)
+        expenses_list.append({
+            'year': local_time.year,
+            'month': MONTH_NAMES[local_time.month],
+            'value': expense.value,
+            'note': expense.note,
+        })
+
+    grouped_data = defaultdict(lambda: defaultdict(list))
+    for expense in expenses_list:
+        grouped_data[expense['year']][expense['month']].append(
+            {'value': expense['value'], 'note': expense['note']})
+    data = {year: dict(month) for year, month in grouped_data.items()}
+
+    for year, months in data.items():
+        for month, expenses in months.items():
+            avg_value = sum(
+                [expense['value'] for expense in expenses]) / len(expenses)
+            notes = ', '.join(
+                [expense['note'] for expense in expenses if expense['note']])
+            data[year][month] = {
+                'avg_values': avg_value,
+                'notes': notes,
+            }
+
+    context = {
+        'data': data,
+    }
+    return render(request, 'daystats/expenses_months.html', context)
