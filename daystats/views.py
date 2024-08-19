@@ -5,10 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from daystats.forms import DaystatForm
-from daystats.models import Daystat
+from daystats.forms import DaystatForm, ExpenseForm
+from daystats.models import Daystat, Expense
 
 
 DATE_RANGE = {
@@ -18,22 +19,35 @@ DATE_RANGE = {
     'year': datetime.timedelta(days=365),
     '5year': datetime.timedelta(days=1825),
 }
+MONTH_NAMES = {
+    1: 'январь',
+    2: 'февраль',
+    3: 'март',
+    4: 'апрель',
+    5: 'май',
+    6: 'июнь',
+    7: 'июль',
+    8: 'август',
+    9: 'сентябрь',
+    10: 'октябрь',
+    11: 'ноябрь',
+    12: 'декабрь',
+}
 
 
 @login_required
 def today(request, date=None):
     if date:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
-        if date == datetime.date.today():
+        if date == timezone.localdate():
             return redirect('daystats:today')
-        elif date > datetime.date.today():
+        elif date > timezone.localdate():
             context = {
                 'date': date,
             }
             return render(request, 'daystats/future_day.html', context)
     else:
-        date = datetime.date.today()
-
+        date = timezone.localdate()
     daystat, _ = Daystat.objects.get_or_create(
         user=request.user,
         date=date,
@@ -66,7 +80,7 @@ def today(request, date=None):
         'date': date,
         'yesterday': date - datetime.timedelta(days=1),
         'tomorrow': (date + datetime.timedelta(days=1)
-                     if date != datetime.date.today() else ''),
+                     if date != timezone.localdate() else ''),
         'daystat': daystat,
         'form': form,
         'period_day': period_day,
@@ -121,7 +135,7 @@ def chart(request):
 def chart_api(request, type, range):
     dataset = {}
     dataset['data'] = []
-    today = datetime.date.today()
+    today = timezone.localdate()
     start = today - DATE_RANGE[range]
     end = today
     daystats = Daystat.objects.filter(
@@ -168,3 +182,110 @@ def calories_summary(request):
         'data': data,
     }
     return render(request, 'daystats/calories_summary.html', context)
+
+
+@login_required
+def expenses(request):
+    last_week_expenses = Expense.objects.filter(
+        user=request.user,
+        created_at__gte=timezone.now() - DATE_RANGE['week'],
+    ).order_by('-created_at')
+    form = ExpenseForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        expense = form.save(commit=False)
+        expense.user = request.user
+        expense.save()
+        return redirect('daystats:expenses')
+    context = {
+        'last_week_expenses': last_week_expenses,
+        'form': form,
+    }
+    return render(request, 'daystats/expenses.html', context)
+
+
+@login_required
+def expense_edit(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.user != expense.user:
+        return redirect('daystats:expenses')
+    next_page = request.GET.get('next', 'daystats:expenses')
+    form = ExpenseForm(request.POST or None, instance=expense)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect(next_page)
+    context = {
+        'form': form,
+    }
+    return render(request, 'daystats/expense_edit.html', context)
+
+
+@login_required
+def expenses_weeks(request):
+    expenses = Expense.objects.filter(user=request.user)
+    expenses_list = []
+    for expense in expenses:
+        local_time = timezone.localtime(expense.created_at)
+        expenses_list.append({
+            'year': local_time.year,
+            'week': int(local_time.strftime('%W')),
+            'value': expense.value,
+            'note': expense.note,
+        })
+
+    grouped_data = defaultdict(lambda: defaultdict(list))
+    for expense in expenses_list:
+        grouped_data[expense['year']][expense['week']].append(
+            {'value': expense['value'], 'note': expense['note']})
+    data = {year: dict(weeks) for year, weeks in grouped_data.items()}
+
+    for year, weeks in data.items():
+        for week, expenses in weeks.items():
+            avg_value = sum(
+                [expense['value'] for expense in expenses]) / len(expenses)
+            notes = ', '.join(
+                [expense['note'] for expense in expenses if expense['note']])
+            data[year][week] = {
+                'avg_values': avg_value,
+                'notes': notes,
+            }
+
+    context = {
+        'data': data,
+    }
+    return render(request, 'daystats/expenses_weeks.html', context)
+
+
+@ login_required
+def expenses_months(request):
+    expenses = Expense.objects.filter(user=request.user)
+    expenses_list = []
+    for expense in expenses:
+        local_time = timezone.localtime(expense.created_at)
+        expenses_list.append({
+            'year': local_time.year,
+            'month': MONTH_NAMES[local_time.month],
+            'value': expense.value,
+            'note': expense.note,
+        })
+
+    grouped_data = defaultdict(lambda: defaultdict(list))
+    for expense in expenses_list:
+        grouped_data[expense['year']][expense['month']].append(
+            {'value': expense['value'], 'note': expense['note']})
+    data = {year: dict(month) for year, month in grouped_data.items()}
+
+    for year, months in data.items():
+        for month, expenses in months.items():
+            avg_value = sum(
+                [expense['value'] for expense in expenses]) / len(expenses)
+            notes = ', '.join(
+                [expense['note'] for expense in expenses if expense['note']])
+            data[year][month] = {
+                'avg_values': avg_value,
+                'notes': notes,
+            }
+
+    context = {
+        'data': data,
+    }
+    return render(request, 'daystats/expenses_months.html', context)

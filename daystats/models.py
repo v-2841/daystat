@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -44,10 +45,6 @@ class Daystat(models.Model):
         default=False,
         verbose_name='Начало цикла',
     )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Время обновления',
-    )
 
     class Meta:
         ordering = ['-date', 'user']
@@ -61,8 +58,46 @@ class Daystat(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.user} | {self.date}'
+        return f'{self.user} | {self.date.strftime("%d %B %Y г.")}'
 
     def save(self, *args, **kwargs):
         self.week = int(self.date.strftime('%W'))
         super().save(*args, **kwargs)
+
+
+class Expense(models.Model):
+    value = models.PositiveIntegerField(
+        verbose_name='Сумма',
+    )
+    note = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        verbose_name='Примечание',
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='expenses',
+        verbose_name='Пользователь',
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Время создания',
+    )
+
+    class Meta:
+        ordering = ['-created_at', 'user']
+        verbose_name = 'Расход'
+        verbose_name_plural = 'Расходы'
+
+    def __str__(self):
+        local_time = timezone.localtime(self.created_at)
+        return f'{self.user} | {local_time.strftime("%d %B %Y г. %H:%M")}'
+
+    @property
+    def week(self):
+        local_time = timezone.localtime(self.created_at)
+        return int(local_time.strftime('%W'))
+
+    week.fget.short_description = 'Неделя'
