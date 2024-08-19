@@ -20,7 +20,7 @@
             {% for month, data in months.items %}
               <tr>
                 <td>{{ month }}</td>
-                <td>{{ data.avg_values|floatformat:0 }}</td>
+                <td>{{ data.sum_value|floatformat:0 }}</td>
                 <td>{{ data.notes }}</td>
               </tr>
             {% endfor %}
