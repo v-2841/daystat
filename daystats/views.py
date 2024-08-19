@@ -240,12 +240,12 @@ def expenses_weeks(request):
 
     for year, weeks in data.items():
         for week, expenses in weeks.items():
-            avg_value = sum(
-                [expense['value'] for expense in expenses]) / len(expenses)
+            sum_value = sum(
+                [expense['value'] for expense in expenses])
             notes = ', '.join(
                 [expense['note'] for expense in expenses if expense['note']])
             data[year][week] = {
-                'avg_values': avg_value,
+                'sum_value': sum_value,
                 'notes': notes,
             }
 
@@ -276,12 +276,12 @@ def expenses_months(request):
 
     for year, months in data.items():
         for month, expenses in months.items():
-            avg_value = sum(
-                [expense['value'] for expense in expenses]) / len(expenses)
+            sum_value = sum(
+                [expense['value'] for expense in expenses])
             notes = ', '.join(
                 [expense['note'] for expense in expenses if expense['note']])
             data[year][month] = {
-                'avg_values': avg_value,
+                'sum_value': sum_value,
                 'notes': notes,
             }
 
