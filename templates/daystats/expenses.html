@@ -35,11 +35,13 @@
           </form>
         </div>
       </div>
-      <div class="text-center mt-3">
-        <div class="btn-group w-100" role="group" aria-label="Выбор периода">
-          <a type="button" class="btn btn-outline-pink w-50" href="{% url 'daystats:expenses_weeks' %}">Расходы по неделям</a>
-          <a type="button" class="btn btn-outline-pink w-50" href="{% url 'daystats:expenses_months' %}">Расходы по месяцам</a>
-        </div>
+      <div class="btn-group w-100 mt-3" role="group" aria-label="Выбор периода">
+        <a type="button"
+           class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
+           href="{% url 'daystats:expenses_weeks' %}">Расходы по неделям</a>
+        <a type="button"
+           class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
+           href="{% url 'daystats:expenses_months' %}">Расходы по месяцам</a>
       </div>
     </div>
   </div>
