@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 {% block title %}
-  Расходы по неделям
+    Расходы по неделям
 {% endblock title %}
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="text-center col-lg-6">
-      <h1 class="pb-3">Расходы по неделям</h1>
-      {% for year, weeks in data.items %}
-        <h4 class="py-2">Год: {{ year }}</h4>
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Неделя</th>
-              <th>Расходы</th>
-              <th>Примечания</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for week, data in weeks.items %}
-              <tr>
-                <td>{{ week }}</td>
-                <td>{{ data.sum_value|floatformat:0 }}</td>
-                <td>{{ data.notes }}</td>
-              </tr>
+    <div class="row justify-content-center">
+        <div class="text-center col-lg-6">
+            <h1 class="pb-3">Расходы по неделям</h1>
+            {% for year, weeks in data.items %}
+                <h4 class="py-2">Год: {{ year }}</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Неделя</th>
+                            <th>Расходы</th>
+                            <th>Примечания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week, data in weeks.items %}
+                            <tr>
+                                <td>{{ week }}</td>
+                                <td>{{ data.sum_value|floatformat:0 }}</td>
+                                <td>{{ data.notes }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% endfor %}
-          </tbody>
-        </table>
-      {% endfor %}
+        </div>
     </div>
-  </div>
 {% endblock content %}

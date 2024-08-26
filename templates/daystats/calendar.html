@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-  Календарь
+    Календарь
 {% endblock title %}
 {% block extrahead %}
-  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 {% endblock extrahead %}
 {% block content %}
-  <div id="calendar"></div>
-  <script src="{% static 'js/calendar.js' %}"></script>
+    <div id="calendar"></div>
+    <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock content %}

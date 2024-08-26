@@ -255,7 +255,7 @@ def expenses_weeks(request):
     return render(request, 'daystats/expenses_weeks.html', context)
 
 
-@ login_required
+@login_required
 def expenses_months(request):
     expenses = Expense.objects.filter(user=request.user)
     expenses_list = []

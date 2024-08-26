@@ -1,22 +1,24 @@
 [tool.poetry]
 name = "daystat"
 version = "0.1.0"
-description = ""
+description = "A Django-based application for daily statistics."
 authors = ["Vitaliy Pavlov <v-2841@yandex.ru>"]
 readme = "README.md"
+license = "LICENSE"
 
 [tool.poetry.dependencies]
 python = ">=3.10, <=3.12"
 django = "^5.1"
 python-dotenv = "^1.0.1"
-djlint = "^1.34.1"
-django-debug-toolbar = "^4.4.6"
 gunicorn = "^23.0.0"
 
+[tool.poetry.group.dev.dependencies]
+djlint = "^1.34.1"
+django-debug-toolbar = "^4.4.6"
+
+[tool.poetry.group.test.dependencies]
+flake8 = "^7.1.1"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core^1.8.3"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.djlint]
-ignore = "H030,H031,H021"

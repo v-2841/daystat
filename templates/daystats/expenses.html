@@ -1,71 +1,71 @@
 {% extends "base.html" %}
 {% load user_filters %}
 {% block title %}
-  Расходы
+    Расходы
 {% endblock title %}
 {% block content %}
-  <h1 class="py-3">Расходы</h1>
-  <div class="row justify-content-center">
-    <div class="col-lg-4">
-      <div class="card">
-        <div class="card-header text-center text-light">Добавить расход</div>
-        <div class="card-body">
-          {% if form.errors %}
-            <div class="alert alert-danger">
-              {% for field in form %}
-                {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
-              {% endfor %}
-              {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
+    <h1 class="py-3">Расходы</h1>
+    <div class="row justify-content-center">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header text-center text-light">Добавить расход</div>
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {% for field in form %}
+                                {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
+                        </div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label" for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="required text-danger">*</span>{% endif %}
+                                </label>
+                                {{ field|addclass:'form-control' }}
+                            </div>
+                        {% endfor %}
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-pink">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-          {% endif %}
-          <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-              <div class="mb-3">
-                <label class="form-label" for="{{ field.id_for_label }}">
-                  {{ field.label }}
-                  {% if field.field.required %}<span class="required text-danger">*</span>{% endif %}
-                </label>
-                {{ field|addclass:'form-control' }}
-              </div>
-            {% endfor %}
-            <div class="text-center">
-              <button type="submit" class="btn btn-pink">Сохранить</button>
+            <div class="btn-group w-100 mt-3" role="group" aria-label="Выбор периода">
+                <a type="button"
+                   class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
+                   href="{% url 'daystats:expenses_weeks' %}">Расходы по неделям</a>
+                <a type="button"
+                   class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
+                   href="{% url 'daystats:expenses_months' %}">Расходы по месяцам</a>
             </div>
-          </form>
         </div>
-      </div>
-      <div class="btn-group w-100 mt-3" role="group" aria-label="Выбор периода">
-        <a type="button"
-           class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
-           href="{% url 'daystats:expenses_weeks' %}">Расходы по неделям</a>
-        <a type="button"
-           class="btn btn-outline-pink d-flex align-items-center justify-content-center w-50"
-           href="{% url 'daystats:expenses_months' %}">Расходы по месяцам</a>
-      </div>
     </div>
-  </div>
-  <hr>
-  <h5>Расходы за последние 7 дней</h5>
-  <table class="table table-bordered table-hover">
-    <thead>
-      <tr>
-        <th>Дата</th>
-        <th>Сумма</th>
-        <th>Примечание</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for expense in last_week_expenses %}
-        <tr id="expense_{{ expense.id }}"
-            onclick="window.location='{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}'">
-          <td>{{ expense.created_at|date:"d M Y г." }}</td>
-          <td>{{ expense.value }}</td>
-          <td>
-            {% if expense.note %}{{ expense.note|truncatechars:11 }}{% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <hr>
+    <h5>Расходы за последние 7 дней</h5>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Примечание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in last_week_expenses %}
+                <tr id="expense_{{ expense.id }}"
+                    onclick="window.location='{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}'">
+                    <td>{{ expense.created_at|date:"d M Y г." }}</td>
+                    <td>{{ expense.value }}</td>
+                    <td>
+                        {% if expense.note %}{{ expense.note|truncatechars:11 }}{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock content %}
