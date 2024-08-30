@@ -9,5 +9,9 @@
 {% endblock extrahead %}
 {% block content %}
     <div id="calendar"></div>
+    <div class="card my-4 text-center">
+        <div class="card-header">Прогноз начала следующего цикла</div>
+        <div class="card-body">{{ next_period_date }}</div>
+    </div>
     <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock content %}

@@ -90,7 +90,25 @@ def today(request, date=None):
 
 @login_required
 def calendar(request):
-    return render(request, 'daystats/calendar.html')
+    periods_days = Daystat.objects.filter(
+        user=request.user,
+        period_start=True,
+    ).values('date').order_by('-date')
+    if periods_days and len(periods_days) > 1:
+        dates = [period['date'] for period in periods_days]
+        dates_diff = [(dates[i] - dates[i + 1]).days
+                      for i in range(len(dates) - 1)]
+        weights = list(range(len(dates_diff), 0, -1))
+        next_period_diff = (sum(d * w for d, w in zip(dates_diff, weights))
+                            / sum(weights))
+        next_period_date = dates[0] + datetime.timedelta(
+            days=round(next_period_diff))
+    else:
+        next_period_date = '-'
+    context = {
+        'next_period_date': next_period_date,
+    }
+    return render(request, 'daystats/calendar.html', context)
 
 
 @login_required
