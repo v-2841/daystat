@@ -92,6 +92,7 @@ def today(request, date=None):
 def calendar(request):
     periods_days = Daystat.objects.filter(
         user=request.user,
+        date__gte=timezone.localdate() - DATE_RANGE['year'],
         period_start=True,
     ).values('date').order_by('-date')
     if periods_days and len(periods_days) > 1:
