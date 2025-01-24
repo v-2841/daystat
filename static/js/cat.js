@@ -5,7 +5,7 @@ let catImage = document.getElementById("cat-image");
 catButton.addEventListener("click", () => {
     catButton.classList.add("d-none");
     catLoading.classList.remove("d-none");
-    fetch("https://cataas.com/cat/gif")
+    fetch("https://cataas.com/cat")
         .then((response) => response.blob())
         .then((blob) => {
             catImage.src = URL.createObjectURL(blob);
