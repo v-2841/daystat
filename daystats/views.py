@@ -234,8 +234,17 @@ def expense_edit(request, pk):
         return redirect(next_page)
     context = {
         'form': form,
+        'expense': expense,
     }
     return render(request, 'daystats/expense_edit.html', context)
+
+
+@login_required
+def expense_delete(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.user == expense.user and request.method == 'POST':
+        expense.delete()
+    return redirect('daystats:expenses')
 
 
 @login_required

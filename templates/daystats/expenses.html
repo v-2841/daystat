@@ -68,4 +68,14 @@
             {% endfor %}
         </tbody>
     </table>
+    <script>
+        window.addEventListener("load", () => {
+            if (window.location.hash) {
+                const target = document.querySelector(window.location.hash);
+                if (target) {
+                    target.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }
+        });
+    </script>
 {% endblock content %}

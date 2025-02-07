@@ -16,5 +16,7 @@ urlpatterns = [
     path('expenses/weeks/', views.expenses_weeks, name='expenses_weeks'),
     path('expenses/months/', views.expenses_months, name='expenses_months'),
     path('expenses/', views.expenses, name='expenses'),
+    path('expense_delete/<int:pk>/', views.expense_delete,
+         name='expense_delete'),
     path('', views.today, name='today'),
 ]

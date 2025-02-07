@@ -31,7 +31,7 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --without dev
+        run: poetry install --no-root --without dev
       - name: Run flake8
         run: poetry run flake8
       - name: Run tests
@@ -54,7 +54,7 @@ jobs:
             cd ${{ secrets.PROJECT_FOLDER }}
             git pull
             export PATH="$HOME/.local/bin:$PATH"
-            poetry install --no-interaction --only main
+            poetry install --without test
             poetry run python manage.py migrate
             poetry run python manage.py collectstatic --noinput
             systemctl restart ${{ secrets.SERVICE_NAME }}

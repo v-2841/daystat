@@ -27,10 +27,40 @@
                             <label class="form-label" for="id_note">Примечание</label>
                             {{ form.note|addclass:'form-control' }}
                         </div>
-                        <div class="text-center">
+                        <div class="text-center mb-3">
                             <button type="submit" class="btn btn-pink">Сохранить изменения</button>
                         </div>
                     </form>
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-outline-pink"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal">Удалить</button>
+                    </div>
+                    <div class="modal fade"
+                         id="deleteModal"
+                         tabindex="-1"
+                         aria-labelledby="deleteModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteModalLabel">Удалить запись?</h1>
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-pink" data-bs-dismiss="modal">Отмена</button>
+                                    <form method="post" action="{% url 'daystats:expense_delete' expense.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-pink">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
