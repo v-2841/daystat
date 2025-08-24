@@ -42,4 +42,4 @@ ENV PATH="/app/.venv/bin:${PATH}" \
 RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "daystat.wsgi", "--bind", "0.0.0.0:8000", "access-logfile", "-", "error-logfile", "-", "--capture-output"]
+CMD ["gunicorn", "daystat.wsgi", "--bind", "0.0.0.0:8000", "access-logfile", "-", "error-logfile", "-", "--capture-output", "--log-level", "info"]
