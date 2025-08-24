@@ -25,8 +25,11 @@ FROM ubuntu:22.04 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.10 python3.10-venv ca-certificates tzdata \
+    python3.10 python3.10-venv ca-certificates tzdata locales \
  && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen ru_RU.UTF-8
+RUN update-locale LANG=ru_RU.UTF-8
 
 WORKDIR /app
 
