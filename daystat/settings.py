@@ -105,3 +105,5 @@ LOGIN_REDIRECT_URL = 'daystats:today'
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
