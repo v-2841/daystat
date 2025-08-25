@@ -14,3 +14,4 @@ services:
     env_file: .env
     volumes:
       - ./static/:/var/www/daystat/static/
+      - ./db.sqlite3:/app/db.sqlite3
