@@ -5,8 +5,7 @@
     }
 
     handle /favicon.ico {
-        root * /var/www/daystat
-        rewrite * /static/img/favicon.ico
+        root /var/www/daystat/static/img/favicon.ico
         file_server
     }
 
