@@ -15,6 +15,7 @@ services:
     restart: always
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./static/:/var/www/daystat/static/
 
   app:
     build: .
