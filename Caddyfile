@@ -1,15 +1,14 @@
 :80 {
-    handle /static/* {
-        root * /var/www/daystat
+    handle_path /static/* {
+        root * /var/www/daystat/static
         file_server
     }
 
     handle /favicon.ico {
-        root * /var/www/daystat/static/img
+        root * /var/www/daystat
+        rewrite * /static/img/favicon.ico
         file_server
     }
 
-    handle {
-        reverse_proxy http://app:8000
-    }
+    reverse_proxy http://app:8000
 }
