@@ -93,3 +93,12 @@ input[type="checkbox"] {
 .cat-loading {
     color: #991a7d;
 }
+
+/* FullCalendar navigation buttons: remove focus outline/box-shadow */
+.fc .fc-button:focus,
+.fc .fc-button:focus-visible,
+.fc .fc-button-primary:focus,
+.fc .fc-button-primary:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
