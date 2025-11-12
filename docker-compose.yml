@@ -16,3 +16,6 @@ services:
     volumes:
       - ./static/:/app/static/
       - ./db.sqlite3:/app/db.sqlite3
+
+volumes:
+  caddy_data:
