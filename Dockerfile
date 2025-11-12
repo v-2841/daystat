@@ -25,7 +25,6 @@ ENV PATH="/app/.venv/bin:${PATH}" \
 COPY . /app
 COPY --from=base /app/.venv /app/.venv
 
-RUN python manage.py migrate
-RUN python manage.py collectstatic --noinput
+RUN chmod +x /app/entrypoint.sh
 
-CMD ["gunicorn", "daystat.wsgi", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]
+ENTRYPOINT ["/app/entrypoint.sh"]
