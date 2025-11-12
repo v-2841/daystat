@@ -6,12 +6,12 @@ services:
     restart: always
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./static/:/var/www/daystat/static/
+      - ./static/:/srv/daystat/static/
 
   app:
     build: .
     restart: always
     env_file: .env
     volumes:
-      - ./static/:/var/www/daystat/static/
+      - ./static/:/app/static/
       - ./db.sqlite3:/app/db.sqlite3

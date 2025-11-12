@@ -1,11 +1,11 @@
 :80 {
     handle_path /static/* {
-        root * /var/www/daystat/static
+        root * /srv/daystat/static
         file_server
     }
 
     handle /favicon.ico {
-        root * /var/www/daystat
+        root * /srv/daystat
         rewrite * /static/img/favicon.ico
         file_server
     }
