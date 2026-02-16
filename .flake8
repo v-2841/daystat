@@ -1,0 +1,5 @@
+[flake8]
+per-file-ignores =
+    daystat/settings.py: E501
+    **/migrations/*.py: E501
+exclude = .venv,
