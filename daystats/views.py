@@ -35,6 +35,27 @@ MONTH_NAMES = {
 }
 
 
+def predict_next_period_date(user):
+    periods_days = list(
+        Daystat.objects.filter(
+            user=user,
+            date__gte=timezone.localdate() - DATE_RANGE['year'],
+            period_start=True,
+        )
+        .values_list('date', flat=True)
+        .order_by('-date')
+    )
+    if len(periods_days) > 1:
+        dates = periods_days
+        dates_diff = [(dates[i] - dates[i + 1]).days
+                      for i in range(len(dates) - 1)]
+        weights = list(range(len(dates_diff), 0, -1))
+        next_period_diff = (sum(d * w for d, w in zip(dates_diff, weights))
+                            / sum(weights))
+        return dates[0] + datetime.timedelta(days=round(next_period_diff))
+    return None
+
+
 @login_required
 def today(request, date=None):
     if date:
@@ -90,22 +111,7 @@ def today(request, date=None):
 
 @login_required
 def calendar(request):
-    periods_days = Daystat.objects.filter(
-        user=request.user,
-        date__gte=timezone.localdate() - DATE_RANGE['year'],
-        period_start=True,
-    ).values('date').order_by('-date')
-    if periods_days and len(periods_days) > 1:
-        dates = [period['date'] for period in periods_days]
-        dates_diff = [(dates[i] - dates[i + 1]).days
-                      for i in range(len(dates) - 1)]
-        weights = list(range(len(dates_diff), 0, -1))
-        next_period_diff = (sum(d * w for d, w in zip(dates_diff, weights))
-                            / sum(weights))
-        next_period_date = dates[0] + datetime.timedelta(
-            days=round(next_period_diff))
-    else:
-        next_period_date = '-'
+    next_period_date = predict_next_period_date(request.user) or '-'
     context = {
         'next_period_date': next_period_date,
     }
@@ -141,6 +147,14 @@ def calendar_api(request):
             'title': f'{daystat.calories if daystat.calories else "-"}',
             'backgroundColor': 'rgba(0, 0, 255, 0.2)',
             'borderColor': 'rgba(0, 0, 255, 1)',
+        })
+    next_period_date = predict_next_period_date(request.user)
+    if next_period_date and start <= next_period_date <= end:
+        data.append({
+            'start': next_period_date.strftime('%Y-%m-%d'),
+            'title': 'Цикл',
+            'backgroundColor': 'rgba(255, 0, 0, 0.1)',
+            'borderColor': 'rgba(255, 0, 0, 0.6)',
         })
     return JsonResponse(data, safe=False)
 
