@@ -30,19 +30,15 @@ document.addEventListener("DOMContentLoaded", function () {
     calendar.render();
 
     var hammer = new Hammer(calendarEl);
-    hammer.get("pan").set({
-        direction: Hammer.DIRECTION_ALL,
-        threshold: 50,
-        velocity: 0.3,
+    hammer.get("swipe").set({
+        direction: Hammer.DIRECTION_HORIZONTAL,
+        threshold: 20,
+        velocity: 0.2,
     });
-
-    hammer.on("pan", function (ev) {
-        if (ev.isFinal) {
-            if (ev.velocityX > 0) {
-                calendar.prev();
-            } else if (ev.velocityX < 0) {
-                calendar.next();
-            }
-        }
+    hammer.on("swipeleft", function () {
+        calendar.next();
+    });
+    hammer.on("swiperight", function () {
+        calendar.prev();
     });
 });
