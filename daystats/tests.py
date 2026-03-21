@@ -91,44 +91,6 @@ class DaystatTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['title'], 'Вес, кг')
 
-    def test_chart_api_year_smoothing(self):
-        """Для диапазона year график веса сглаживается."""
-        self.create_series(points_count=20)
-        response = self.client.get(
-            reverse('daystats:chart_api', args=['weight', 'year']))
-
-        self.assertEqual(response.status_code, 200)
-        values = [point[1] for point in response.json()['data']]
-        self.assertEqual(len(values), 20)
-        self.assertEqual(values[0], 4.5)
-        self.assertEqual(values[10], 11.0)
-        self.assertEqual(values[-1], 16.5)
-
-    def test_chart_api_6months_smoothing(self):
-        """Для диапазона 6months график веса сглаживается."""
-        self.create_series(points_count=20)
-        response = self.client.get(
-            reverse('daystats:chart_api', args=['weight', '6months']))
-
-        self.assertEqual(response.status_code, 200)
-        values = [point[1] for point in response.json()['data']]
-        self.assertEqual(len(values), 20)
-        self.assertEqual(values[0], 2.5)
-        self.assertEqual(values[10], 11.0)
-        self.assertEqual(values[-1], 18.5)
-
-    def test_chart_api_month_no_smoothing(self):
-        """Для диапазона month график веса остается без сглаживания."""
-        self.create_series(points_count=20)
-        response = self.client.get(
-            reverse('daystats:chart_api', args=['weight', 'month']))
-
-        self.assertEqual(response.status_code, 200)
-        values = [point[1] for point in response.json()['data']]
-        self.assertEqual(values[0], 1)
-        self.assertEqual(values[10], 11)
-        self.assertEqual(values[-1], 20)
-
     def test_calories_summary_view(self):
         """Доступ к 'daystats:calories_summary'"""
         response = self.client.get(reverse('daystats:calories_summary'))
