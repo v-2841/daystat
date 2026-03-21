@@ -19,6 +19,11 @@ DATE_RANGE = {
     'year': datetime.timedelta(days=365),
     '5year': datetime.timedelta(days=1825),
 }
+SMOOTHING_WINDOWS = {
+    '6months': 5,
+    'year': 10,
+    '5year': 20,
+}
 MONTH_NAMES = {
     1: 'январь',
     2: 'февраль',
@@ -33,6 +38,37 @@ MONTH_NAMES = {
     11: 'ноябрь',
     12: 'декабрь',
 }
+
+
+def moving_average(points, window_size):
+    if window_size <= 1 or not points:
+        return points
+
+    half_window = window_size // 2
+    smoothed_points = []
+    for index, (point_date, _) in enumerate(points):
+        start = max(0, index - half_window)
+        end = min(len(points), index + half_window + 1)
+        window_values = [value for _, value in points[start:end]]
+        average = round(sum(window_values) / len(window_values), 2)
+        smoothed_points.append((point_date, average))
+    return smoothed_points
+
+
+def build_chart_points(daystats, field_name, range_name):
+    points = []
+    for daystat in daystats:
+        value = getattr(daystat, field_name)
+        if value is None:
+            continue
+        points.append((daystat.date, value))
+
+    window_size = SMOOTHING_WINDOWS.get(range_name)
+    if window_size:
+        points = moving_average(points, window_size)
+
+    return [[point_date.strftime('%Y-%m-%d'), value]
+            for point_date, value in points]
 
 
 def predict_next_period_date(user):
@@ -178,14 +214,10 @@ def chart_api(request, type, range):
     ).order_by('date')
     if type == 'weight':
         dataset['title'] = 'Вес, кг'
-        for daystat in daystats:
-            dataset['data'].append(
-                [daystat.date.strftime('%Y-%m-%d'), daystat.weight])
+        dataset['data'] = build_chart_points(daystats, 'weight', range)
     elif type == 'calories':
         dataset['title'] = 'Калории, ккал'
-        for daystat in daystats:
-            dataset['data'].append(
-                [daystat.date.strftime('%Y-%m-%d'), daystat.calories])
+        dataset['data'] = build_chart_points(daystats, 'calories', range)
     return JsonResponse(dataset)
 
 
