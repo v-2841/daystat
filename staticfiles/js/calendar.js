@@ -41,4 +41,13 @@ document.addEventListener("DOMContentLoaded", function () {
     hammer.on("swiperight", function () {
         calendar.prev();
     });
+
+    if (window.matchMedia("(pointer: coarse)").matches) {
+        calendarEl.addEventListener("click", function (event) {
+            var button = event.target.closest(".fc-button");
+            if (button) {
+                button.blur();
+            }
+        });
+    }
 });

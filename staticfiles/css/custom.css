@@ -94,12 +94,11 @@ input[type="checkbox"] {
     color: #991a7d;
 }
 
-/* FullCalendar navigation buttons: keep visible keyboard focus */
+/* FullCalendar navigation buttons: remove focus outline/box-shadow */
 .fc .fc-button:focus,
 .fc .fc-button:focus-visible,
 .fc .fc-button-primary:focus,
 .fc .fc-button-primary:focus-visible {
-    outline: 2px solid #4d0d3e !important;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 0.25rem rgba(153, 26, 125, 0.25) !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
