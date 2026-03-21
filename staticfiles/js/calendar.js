@@ -43,11 +43,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     if (window.matchMedia("(pointer: coarse)").matches) {
-        calendarEl.addEventListener("click", function (event) {
-            var button = event.target.closest(".fc-button");
-            if (button) {
-                button.blur();
+        function clearCalendarButtonFocus() {
+            var activeElement = document.activeElement;
+            if (activeElement && activeElement.closest("#calendar")) {
+                if (activeElement.classList.contains("fc-button")) {
+                    activeElement.blur();
+                }
             }
-        });
+        }
+
+        calendarEl.addEventListener(
+            "pointerup",
+            function () {
+                window.setTimeout(clearCalendarButtonFocus, 0);
+            },
+            true
+        );
+        calendarEl.addEventListener(
+            "touchend",
+            function () {
+                window.setTimeout(clearCalendarButtonFocus, 0);
+            },
+            true
+        );
     }
 });
