@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load user_filters %}
+{% load user_filters static %}
 {% block title %}
     {% if request.resolver_match.view_name == 'daystats:today' %}
         Привет, {{ user.first_name }}
@@ -17,7 +17,7 @@
             {% endif %}
         </h1>
         <h5>{{ date }}</h5>
-        <img src="/static/img/cat.png" alt="cat" height="192">
+        <img src="{% static 'img/cat.png' %}" alt="cat" width="192" height="192">
     </div>
     {% if form.errors %}
         <div class="alert alert-danger">

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load user_filters %}
+{% load user_filters static %}
 {% block title %}
     Будущее неизвестно...
 {% endblock title %}
@@ -10,6 +10,6 @@
         <a href="{% url 'daystats:today' %}">Вернуться на главную</a>
     </div>
     <div class="text-center">
-        <img src="/static/img/cat.png" alt="cat" height="192">
+        <img src="{% static 'img/cat.png' %}" alt="cat" width="192" height="192">
     </div>
 {% endblock content %}
