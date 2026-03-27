@@ -78,6 +78,42 @@ class DaystatTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Цикл', response.json()[0]['title'])
 
+    def test_calendar_api_no_prediction_with_less_than_two_period_starts(self):
+        """Если периодов меньше 2, прогноз не строится."""
+        start_date = self.date + datetime.timedelta(days=1)
+        end_date = self.date + datetime.timedelta(days=120)
+        response = self.client.get(reverse('daystats:calendar_api'), {
+            'start': start_date.isoformat(),
+            'end': end_date.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_calendar_api_builds_year_predictions(self):
+        """API возвращает несколько прогнозных дат цикла в диапазоне."""
+        Daystat.objects.create(
+            user=self.user,
+            date=self.date - datetime.timedelta(days=28),
+            period_start=True,
+        )
+        start_date = self.date + datetime.timedelta(days=1)
+        end_date = self.date + datetime.timedelta(days=120)
+        response = self.client.get(reverse('daystats:calendar_api'), {
+            'start': start_date.isoformat(),
+            'end': end_date.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        predicted_dates = [item['start'] for item in response.json()]
+        self.assertEqual(predicted_dates, [
+            (self.date + datetime.timedelta(days=28)).isoformat(),
+            (self.date + datetime.timedelta(days=56)).isoformat(),
+            (self.date + datetime.timedelta(days=84)).isoformat(),
+            (self.date + datetime.timedelta(days=112)).isoformat(),
+        ])
+        self.assertTrue(all(item['title'] == 'Цикл' for item in response.json()))
+
     def test_chart_view(self):
         """Доступ к 'daystats:chart' и корректное использование шаблона"""
         response = self.client.get(reverse('daystats:chart'))
