@@ -73,13 +73,14 @@ def build_chart_points(daystats, field_name, range_name):
 
 
 def predict_next_period_date(user):
-    predicted_dates = predict_period_dates(user)
-    if predicted_dates:
-        return predicted_dates[0]
+    today = timezone.localdate()
+    for predicted_date in predict_period_dates(user, include_past=True):
+        if predicted_date >= today:
+            return predicted_date
     return None
 
 
-def predict_period_dates(user):
+def predict_period_dates(user, include_past=False):
     periods_days = list(
         Daystat.objects.filter(
             user=user,
@@ -104,7 +105,7 @@ def predict_period_dates(user):
         predicted_dates = []
         predicted_date = last_period_date + datetime.timedelta(days=cycle_days)
         while predicted_date <= horizon_end:
-            if predicted_date > today:
+            if include_past or predicted_date >= today:
                 predicted_dates.append(predicted_date)
             predicted_date += datetime.timedelta(days=cycle_days)
         return predicted_dates
@@ -203,7 +204,10 @@ def calendar_api(request):
             'backgroundColor': 'rgba(0, 0, 255, 0.2)',
             'borderColor': 'rgba(0, 0, 255, 1)',
         })
-    for next_period_date in predict_period_dates(request.user):
+    for next_period_date in predict_period_dates(
+        request.user,
+        include_past=True,
+    ):
         if not (start <= next_period_date <= end):
             continue
         data.append({

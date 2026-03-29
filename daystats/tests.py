@@ -114,6 +114,60 @@ class DaystatTests(TestCase):
         ])
         self.assertTrue(all(item['title'] == 'Цикл' for item in response.json()))
 
+    def test_calendar_api_keeps_overdue_predicted_cycle(self):
+        """API includes overdue predicted date when a cycle start is delayed."""
+        Daystat.objects.filter(user=self.user).delete()
+        Daystat.objects.create(
+            user=self.user,
+            date=self.date - datetime.timedelta(days=57),
+            period_start=True,
+        )
+        Daystat.objects.create(
+            user=self.user,
+            date=self.date - datetime.timedelta(days=29),
+            period_start=True,
+        )
+
+        start_date = self.date - datetime.timedelta(days=5)
+        end_date = self.date + datetime.timedelta(days=35)
+        response = self.client.get(reverse('daystats:calendar_api'), {
+            'start': start_date.isoformat(),
+            'end': end_date.isoformat(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        cycle_dates = sorted(
+            event['start']
+            for event in response.json()
+            if event['backgroundColor'] == 'rgba(255, 0, 0, 0.2)'
+        )
+        self.assertEqual(cycle_dates, [
+            (self.date - datetime.timedelta(days=1)).isoformat(),
+            (self.date + datetime.timedelta(days=27)).isoformat(),
+        ])
+
+    def test_calendar_view_next_period_ignores_overdue_prediction(self):
+        """Calendar card still shows the nearest next date, not overdue one."""
+        Daystat.objects.filter(user=self.user).delete()
+        Daystat.objects.create(
+            user=self.user,
+            date=self.date - datetime.timedelta(days=57),
+            period_start=True,
+        )
+        Daystat.objects.create(
+            user=self.user,
+            date=self.date - datetime.timedelta(days=29),
+            period_start=True,
+        )
+
+        response = self.client.get(reverse('daystats:calendar'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context['next_period_date'],
+            self.date + datetime.timedelta(days=27),
+        )
+
     def test_chart_view(self):
         """Доступ к 'daystats:chart' и корректное использование шаблона"""
         response = self.client.get(reverse('daystats:chart'))
