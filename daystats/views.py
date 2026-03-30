@@ -17,7 +17,7 @@ DATE_RANGE = {
     'month': datetime.timedelta(days=30),
     '6months': datetime.timedelta(days=180),
     'year': datetime.timedelta(days=365),
-    '5year': datetime.timedelta(days=1825),
+    '5years': datetime.timedelta(days=1825),
 }
 MONTH_NAMES = {
     1: 'январь',
@@ -37,7 +37,7 @@ PREDICTION_HORIZON = datetime.timedelta(days=365)
 SMOOTHING_WINDOWS = {
     '6months': 5,
     'year': 10,
-    '5year': 20,
+    '5years': 20,
 }
 
 

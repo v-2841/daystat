@@ -35,7 +35,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     type: "time",
                     time: {
                         unit: "day",
-                        tooltipFormat: "DD MMMM yyyy г.",
+                        displayFormats: {
+                            day: "DD MMM YYYY",
+                        },
+                        tooltipFormat: "DD MMM YYYY",
+                    },
+                    ticks: {
+                        callback: (value) => {
+                            const axisFormat =
+                                selectedRange === "year" ||
+                                selectedRange === "5years"
+                                    ? "DD MMM YYYY"
+                                    : "DD MMM";
+                            return moment(value).format(axisFormat);
+                        },
                     },
                     title: {
                         display: true,
