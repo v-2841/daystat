@@ -94,6 +94,16 @@ input[type="checkbox"] {
     color: #991a7d;
 }
 
+/* FullCalendar day-of-week header row */
+.fc .fc-col-header-cell {
+    background-color: #fdc3f5;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: #991a7d;
+    text-decoration: none;
+}
+
 /* FullCalendar navigation buttons: remove focus outline/box-shadow */
 .fc .fc-button:focus,
 .fc .fc-button:focus-visible,

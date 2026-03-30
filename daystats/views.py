@@ -74,7 +74,12 @@ def build_chart_points(daystats, field_name, range_name):
 
 def predict_next_period_date(user):
     today = timezone.localdate()
-    for predicted_date in predict_period_dates(user, include_past=True):
+    predicted_dates = predict_period_dates(user, include_past=True)
+    overdue_dates = [date for date in predicted_dates if date < today]
+    if overdue_dates:
+        return overdue_dates[-1]
+
+    for predicted_date in predicted_dates:
         if predicted_date >= today:
             return predicted_date
     return None
@@ -167,9 +172,23 @@ def today(request, date=None):
 
 @login_required
 def calendar(request):
-    next_period_date = predict_next_period_date(request.user) or '-'
+    next_period_date = predict_next_period_date(request.user)
+    if next_period_date:
+        next_period_date_display = next_period_date.strftime('%d.%m.%Y')
+        delta_days = (next_period_date - timezone.localdate()).days
+        if delta_days > 0:
+            next_period_status = f'осталось {delta_days} дн.'
+        elif delta_days < 0:
+            next_period_status = f'задержка на {abs(delta_days)} дн.'
+        else:
+            next_period_status = 'сегодня'
+    else:
+        next_period_date_display = '-'
+        next_period_status = '-'
+
     context = {
-        'next_period_date': next_period_date,
+        'next_period_date': next_period_date_display,
+        'next_period_status': next_period_status,
     }
     return render(request, 'daystats/calendar.html', context)
 
@@ -177,6 +196,7 @@ def calendar(request):
 @login_required
 def calendar_api(request):
     data = []
+    today = timezone.localdate()
     start = datetime.datetime.fromisoformat(request.GET.get('start')).date()
     end = datetime.datetime.fromisoformat(request.GET.get('end')).date()
     daystats = Daystat.objects.filter(
@@ -210,11 +230,17 @@ def calendar_api(request):
     ):
         if not (start <= next_period_date <= end):
             continue
+        if next_period_date < today:
+            background_color = 'rgba(255, 235, 59, 0.45)'
+            border_color = 'rgba(255, 193, 7, 1)'
+        else:
+            background_color = 'rgba(144, 238, 144, 0.45)'
+            border_color = 'rgba(46, 139, 87, 1)'
         data.append({
             'start': next_period_date.strftime('%Y-%m-%d'),
             'title': 'Цикл',
-            'backgroundColor': 'rgba(255, 0, 0, 0.2)',
-            'borderColor': 'rgba(255, 0, 0, 1)',
+            'backgroundColor': background_color,
+            'borderColor': border_color,
         })
     return JsonResponse(data, safe=False)
 

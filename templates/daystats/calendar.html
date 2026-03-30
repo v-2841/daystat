@@ -8,10 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
 {% endblock extrahead %}
 {% block content %}
-    <div id="calendar"></div>
-    <div class="card my-4 text-center">
+    <div class="card mt-2 mb-4 text-center">
         <div class="card-header">Прогноз начала следующего цикла</div>
-        <div class="card-body">{{ next_period_date }}</div>
+        <div class="card-body">
+            <div class="row g-0">
+                <div class="col-6 border-end">
+                    <div class="small text-muted">Дата</div>
+                    <div class="fw-semibold">{{ next_period_date }}</div>
+                </div>
+                <div class="col-6">
+                    <div class="small text-muted">Статус</div>
+                    <div class="fw-semibold">{{ next_period_status }}</div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="{% static 'js/calendar.js' %}"></script>
+    <div id="calendar"></div>
 {% endblock content %}
