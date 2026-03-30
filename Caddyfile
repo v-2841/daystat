@@ -1,7 +1,6 @@
 :80 {
     handle_path /static/* {
         root * /srv/daystat/static
-        header Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
         file_server
     }
 
