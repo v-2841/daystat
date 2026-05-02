@@ -9,10 +9,9 @@ readme = "README.md"
 requires-python = ">=3.13,<3.15"
 dependencies = [
     "django (>=5.2.8,<6.0.0)",
-    "python-dotenv (>=1.2.1,<2.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
     "django-debug-toolbar (>=6.1.0,<7.0.0)",
-    "djlint (>=1.36.4,<2.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
 ]
 
 
@@ -23,3 +22,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 package-mode = false
+
+[dependency-groups]
+dev = [
+    "isort (>=8.0.1,<9.0.0)",
+    "djlint (>=1.36.4,<2.0.0)",
+]
