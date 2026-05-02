@@ -9,7 +9,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 {% endblock extrahead %}
 {% block content %}
-    <h1 class="pb-3">Вес и калории</h1>
+    <div class="d-flex justify-content-between align-items-center pb-3">
+        <h1 class="mb-0">Вес и калории</h1>
+        <button id="refreshChartButton"
+                type="button"
+                class="btn btn-outline-pink"
+                aria-label="Обновить данные графика"
+                title="Обновить данные графика">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
     <div class="d-flex flex-wrap gap-2 mb-2 align-items-start">
         <div class="btn-group" role="group" aria-label="Выбор параметра">
             <input type="radio"
@@ -64,11 +73,6 @@
             <label class="btn btn-outline-pink d-flex align-items-center"
                    for="5yearsButton">5 лет</label>
         </div>
-        <button id="refreshChartButton"
-                type="button"
-                class="btn btn-outline-pink"
-                aria-label="Обновить данные графика"
-                title="Обновить данные графика">↻</button>
     </div>
     <div class="mt-2 chart-container">
         <canvas id="myChart"></canvas>

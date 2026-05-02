@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 {% endblock extrahead %}
 {% block content %}
-    <h1 class="pb-3">Цикл и вес</h1>
-    <div class="d-flex justify-content-end mb-2">
+    <div class="d-flex justify-content-between align-items-center pb-3">
+        <h1 class="mb-0">Цикл и вес</h1>
         <button id="refreshCycleWeightChartButton"
                 type="button"
                 class="btn btn-outline-pink"
@@ -19,7 +19,7 @@
             <i class="bi bi-arrow-clockwise"></i>
         </button>
     </div>
-    <div class="mt-2 chart-container">
+    <div class="chart-container">
         <canvas id="cycleWeightChart"></canvas>
     </div>
     <script src="{% static 'js/cycle_weight_chart.js' %}"></script>
