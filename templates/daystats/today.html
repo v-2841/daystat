@@ -8,7 +8,7 @@
     {% endif %}
 {% endblock title %}
 {% block content %}
-    <div class="text-center py-md-5 py-3">
+    <div class="text-center pb-md-5 pb-3">
         <h1>
             {% if request.resolver_match.view_name == 'daystats:today' %}
                 Привет, {{ user.first_name }}

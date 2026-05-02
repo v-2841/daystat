@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}
-    График
+    Вес и калории
 {% endblock title %}
 {% block extrahead %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 {% endblock extrahead %}
 {% block content %}
+    <h1 class="pb-3">Вес и калории</h1>
     <div class="d-flex flex-wrap gap-2 mb-2 align-items-start">
         <div class="btn-group" role="group" aria-label="Выбор параметра">
             <input type="radio"

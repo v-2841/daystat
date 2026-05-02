@@ -16,9 +16,13 @@
                aria-label="Календарь"
                title="Календарь"><i class="bi bi-calendar3 fs-1"></i></a>
             <a class="nav-link text-light ms-4 ms-md-5"
+               href="{% url 'daystats:cycle_weight_chart' %}"
+               aria-label="Цикл и вес"
+               title="Цикл и вес"><i class="bi bi-clipboard2-pulse fs-1"></i></a>
+            <a class="nav-link text-light ms-4 ms-md-5"
                href="{% url 'daystats:chart' %}"
-               aria-label="График"
-               title="График"><i class="bi bi-graph-down fs-1"></i></a>
+               aria-label="Вес и калории"
+               title="Вес и калории"><i class="bi bi-graph-down fs-1"></i></a>
         {% endif %}
     </div>
 </nav>

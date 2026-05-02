@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Цикл и вес
+{% endblock title %}
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
+{% endblock extrahead %}
+{% block content %}
+    <h1 class="pb-3">Цикл и вес</h1>
+    <div class="d-flex justify-content-end mb-2">
+        <button id="refreshCycleWeightChartButton"
+                type="button"
+                class="btn btn-outline-pink"
+                aria-label="Обновить данные графика"
+                title="Обновить данные графика">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+    <div class="mt-2">
+        <canvas id="cycleWeightChart"></canvas>
+    </div>
+    <script src="{% static 'js/cycle_weight_chart.js' %}"></script>
+{% endblock content %}

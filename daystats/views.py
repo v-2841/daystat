@@ -72,6 +72,33 @@ def build_chart_points(daystats, field_name, range_name):
             for point_date, value in points]
 
 
+def get_range_name_for_dates(start_date, end_date):
+    if not start_date or not end_date:
+        return 'week'
+
+    date_range = end_date - start_date
+    if date_range <= DATE_RANGE['week']:
+        return 'week'
+    if date_range <= DATE_RANGE['month']:
+        return 'month'
+    if date_range <= DATE_RANGE['6months']:
+        return '6months'
+    if date_range <= DATE_RANGE['year']:
+        return 'year'
+    return '5years'
+
+
+def build_cycle_length_points(daystats):
+    points = []
+    period_starts = [
+        daystat.date for daystat in daystats if daystat.period_start
+    ]
+    for start_date, next_start_date in zip(period_starts, period_starts[1:]):
+        cycle_length = (next_start_date - start_date).days
+        points.append([next_start_date.strftime('%Y-%m-%d'), cycle_length])
+    return points
+
+
 def predict_next_period_date(user):
     today = timezone.localdate()
     predicted_dates = predict_period_dates(user, include_past=True)
@@ -251,6 +278,11 @@ def chart(request):
 
 
 @login_required
+def cycle_weight_chart(request):
+    return render(request, 'daystats/cycle_weight_chart.html')
+
+
+@login_required
 def chart_api(request, type, range):
     dataset = {}
     dataset['data'] = []
@@ -268,6 +300,35 @@ def chart_api(request, type, range):
     elif type == 'calories':
         dataset['title'] = 'Калории, ккал'
         dataset['data'] = build_chart_points(daystats, 'calories', range)
+    return JsonResponse(dataset)
+
+
+@login_required
+def cycle_weight_chart_api(request):
+    daystats = list(
+        Daystat.objects.filter(
+            user=request.user,
+        ).order_by('date')
+    )
+
+    if daystats:
+        range_name = get_range_name_for_dates(
+            daystats[0].date,
+            daystats[-1].date,
+        )
+    else:
+        range_name = 'week'
+
+    dataset = {
+        'datasets': [
+            {
+                'data': build_cycle_length_points(daystats),
+            },
+            {
+                'data': build_chart_points(daystats, 'weight', range_name),
+            },
+        ],
+    }
     return JsonResponse(dataset)
 
 
