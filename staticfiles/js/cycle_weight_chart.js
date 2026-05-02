@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         },
         options: {
+            maintainAspectRatio: false,
             interaction: {
                 mode: "index",
                 intersect: false,

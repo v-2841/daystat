@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         },
         options: {
+            maintainAspectRatio: false,
             elements: {
                 line: {
                     borderColor: "#991a7d",

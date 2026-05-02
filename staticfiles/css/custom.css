@@ -94,6 +94,16 @@ input[type="checkbox"] {
     color: #991a7d;
 }
 
+.chart-container {
+    height: 440px;
+}
+
+@media (max-width: 575.98px) {
+    .chart-container {
+        height: 380px;
+    }
+}
+
 /* FullCalendar day-of-week header row */
 .fc .fc-col-header-cell {
     background-color: #fdc3f5;
