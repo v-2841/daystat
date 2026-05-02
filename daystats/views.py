@@ -7,6 +7,7 @@ from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from daystats.forms import DaystatForm, ExpenseForm
 from daystats.models import Daystat, Expense
@@ -385,6 +386,12 @@ def expense_edit(request, pk):
     if request.user != expense.user:
         return redirect('daystats:expenses')
     next_page = request.GET.get('next', 'daystats:expenses')
+    if not url_has_allowed_host_and_scheme(
+        url=next_page,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        next_page = 'daystats:expenses'
     form = ExpenseForm(request.POST or None, instance=expense)
     if request.method == 'POST' and form.is_valid():
         form.save()
