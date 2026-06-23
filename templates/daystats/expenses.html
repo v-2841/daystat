@@ -50,7 +50,7 @@
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th>Дата</th>
+                <th>Время</th>
                 <th>Сумма</th>
                 <th>Примечание</th>
             </tr>
@@ -58,8 +58,9 @@
         <tbody>
             {% for expense in last_week_expenses %}
                 <tr id="expense_{{ expense.id }}"
-                    onclick="window.location='{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}'">
-                    <td>{{ expense.created_at|date:"d M Y г." }}</td>
+                    class="expense-row"
+                    data-url="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}">
+                    <td>{{ expense.created_at|date:"d M H:i" }}</td>
                     <td>{{ expense.value }}</td>
                     <td>
                         {% if expense.note %}{{ expense.note|truncatechars:11 }}{% endif %}
@@ -70,6 +71,12 @@
     </table>
     <script>
         window.addEventListener("load", () => {
+            document.querySelectorAll(".expense-row").forEach((row) => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.url;
+                });
+            });
+
             if (window.location.hash) {
                 const target = document.querySelector(window.location.hash);
                 if (target) {
