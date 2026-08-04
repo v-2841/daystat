@@ -111,6 +111,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = [i.strip() for i in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if i.strip()]
 
+SESSION_SAVE_EVERY_REQUEST = True
+
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'daystats:today'
 
