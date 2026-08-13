@@ -583,9 +583,10 @@
 
     /* --- calendar grid --- */
     .day-cell {
-        @apply relative flex flex-col items-center justify-start gap-0.5
-               rounded-2xl px-0.5 py-1.5 text-sm cursor-pointer;
-        aspect-ratio: 1;
+        @apply relative flex flex-col items-center justify-center gap-px
+               rounded-xl px-0 py-1 text-sm cursor-pointer;
+        /* height follows the content on phones so the values always fit */
+        min-height: 2.9rem;
         background: var(--surface-glass-soft);
         border: 1px solid transparent;
         color: var(--text-body);
@@ -596,7 +597,7 @@
     @media (min-width: 640px) {
         .day-cell {
             aspect-ratio: 4 / 3;
-            @apply px-1 py-2;
+            @apply justify-start gap-0.5 rounded-2xl px-1 py-2;
         }
     }
 
@@ -644,14 +645,13 @@
     }
 
     .day-num {
-        @apply font-display text-[0.8rem] font-bold leading-none sm:text-sm;
+        @apply font-display text-[0.78rem] font-bold leading-none sm:text-sm;
         color: var(--text-strong);
     }
 
-    /* values only on wide screens, dots on narrow ones */
     .day-values {
-        @apply hidden flex-col items-center leading-tight sm:flex;
-        font-size: 0.68rem;
+        @apply flex flex-col items-center leading-none;
+        font-size: clamp(0.5rem, 2.4vw, 0.68rem);
     }
 
     .day-weight {
@@ -663,9 +663,10 @@
         color: var(--text-body);
     }
 
+    /* dots now carry only what has no number of its own: cycle markers */
     .day-dots {
-        @apply flex flex-wrap items-center justify-center gap-0.5 sm:hidden;
-        min-height: 0.4rem;
+        @apply flex items-center justify-center gap-0.5 sm:hidden;
+        height: 0.3rem;
     }
 
     .dot {

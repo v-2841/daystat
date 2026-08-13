@@ -58,7 +58,9 @@
             </span>
         </div>
     </section>
-    <section class="card" id="calendar" data-current-month="{{ current_month }}">
+    <section class="card p-2.5 sm:p-6"
+             id="calendar"
+             data-current-month="{{ current_month }}">
         <header class="mb-3 flex items-center justify-between gap-2">
             <a class="btn-icon"
                href="?month={{ prev_month }}"
@@ -77,10 +79,10 @@
                aria-label="Следующий месяц"
                data-nav="next">{% icon "caret-right" "icon w-6 h-6" %}</a>
         </header>
-        <div class="grid grid-cols-7 gap-1 pb-1 text-center">
+        <div class="grid grid-cols-7 gap-0.5 pb-1 text-center sm:gap-1.5">
             {% for name in weekday_names %}<div class="muted text-[0.7rem] font-bold uppercase">{{ name }}</div>{% endfor %}
         </div>
-        <div class="grid grid-cols-7 gap-1 sm:gap-1.5">
+        <div class="grid grid-cols-7 gap-0.5 sm:gap-1.5">
             {% for week in weeks %}
                 {% for day in week %}
                     <button type="button" class="day-cell{% if not day.in_month %} is-outside{% endif %}{% if day.is_today %} is-today{% endif %}{% if day.period_start %} is-period{% endif %}{% if day.predicted %} is-predicted{% if day.predicted_overdue %} is-overdue{% endif %}{% endif %}" data-date="{{ day.date|date:'Y-m-d' }}" data-display="{{ day.display }}" data-weight="{{ day.weight|default_if_none:'' }}" data-calories="{{ day.calories|default_if_none:'' }}" data-period="{% if day.period_start %}1{% endif %}" data-predicted="{% if day.predicted %}{% if day.predicted_overdue %}overdue{% else %}upcoming{% endif %}{% endif %}" data-future="{% if day.is_future %}1{% endif %}" aria-label="{{ day.display }}">
@@ -90,8 +92,6 @@
                             {% if day.calories %}<span class="day-calories tabular-nums">{{ day.calories }}</span>{% endif %}
                         </span>
                         <span class="day-dots" aria-hidden="true">
-                            {% if day.weight %}<i class="dot dot-weight"></i>{% endif %}
-                            {% if day.calories %}<i class="dot dot-calories"></i>{% endif %}
                             {% if day.period_start %}<i class="dot dot-period"></i>{% endif %}
                             {% if day.predicted %}
                                 <i class="dot dot-predicted{% if day.predicted_overdue %} dot-overdue{% endif %}"></i>
@@ -102,8 +102,14 @@
             {% endfor %}
         </div>
         <div class="muted mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
-            <span class="flex items-center gap-1.5"><i class="dot dot-weight"></i>вес</span>
-            <span class="flex items-center gap-1.5"><i class="dot dot-calories"></i>калории</span>
+            <span class="flex items-center gap-1.5">
+                <span class="day-values rounded-md px-1 py-0.5"
+                      style="background: var(--surface-glass-strong)">
+                    <span class="day-weight tabular-nums">63,4</span>
+                    <span class="day-calories tabular-nums">1800</span>
+                </span>
+                вес и калории
+            </span>
             <span class="flex items-center gap-1.5"><i class="dot dot-period"></i>начало цикла</span>
             <span class="flex items-center gap-1.5"><i class="dot dot-predicted"></i>прогноз</span>
             <span class="flex items-center gap-1.5"><i class="dot dot-predicted dot-overdue"></i>задержка</span>
