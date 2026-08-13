@@ -1,59 +1,42 @@
 {% extends "base.html" %}
+{% load ui %}
 {% block title %}
-    Редактировать профиль
+    Профиль
 {% endblock title %}
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header text-light">Редактировать профиль</div>
-                <div class="card-body">
-                    {% if form.errors %}
-                        {% for field in form %}
-                            {% for error in field.errors %}<div class="alert alert-danger">{{ field.label }}: {{ error|escape }}</div>{% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error|escape }}</div>{% endfor %}
-                    {% endif %}
-                    {% if messages %}
-                        <div class="alert alert-success">
-                            {% for message in messages %}{{ message }}{% endfor %}
-                        </div>
-                    {% endif %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label" for="id_first_name">Имя</label>
-                            <input type="text"
-                                   name="first_name"
-                                   maxlength="30"
-                                   class="form-control"
-                                   id="id_first_name"
-                                   value="{{ form.first_name.value|default:'' }}" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_last_name">Фамилия</label>
-                            <input type="text"
-                                   name="last_name"
-                                   maxlength="150"
-                                   class="form-control"
-                                   id="id_last_name"
-                                   value="{{ form.last_name.value|default:'' }}" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_email">Адрес электронной почты</label>
-                            <input type="email"
-                                   name="email"
-                                   maxlength="254"
-                                   class="form-control"
-                                   id="id_email"
-                                   value="{{ form.email.value|default:'' }}" />
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-pink">Сохранить изменения</button>
-                        </div>
-                    </form>
-                </div>
+    <div class="mx-auto max-w-md">
+        <h1 class="page-title mb-4">Профиль</h1>
+        {% if form.errors %}
+            <div class="alert alert-error mb-3">
+                {% for field in form %}
+                    {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
             </div>
-        </div>
+        {% endif %}
+        {% if messages %}
+            <div class="alert alert-success mb-3 flex items-center gap-2">
+                {% icon "check-circle" "icon w-5 h-5" %}
+                <span>{% for message in messages %}{{ message }}{% endfor %}</span>
+            </div>
+        {% endif %}
+        <form method="post" class="card space-y-3">
+            {% csrf_token %}
+            {% for field in form %}
+                <div>
+                    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field|field_class:"field" }}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary w-full" type="submit">
+                {% icon "floppy-disk" "icon w-5 h-5" %}
+                <span>Сохранить</span>
+            </button>
+        </form>
+        <a class="btn btn-ghost mt-3 w-full"
+           href="{% url 'users:password_change_form' %}">
+            {% icon "key" "icon w-5 h-5" %}
+            <span>Изменить пароль</span>
+        </a>
     </div>
 {% endblock content %}

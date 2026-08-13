@@ -1,0 +1,10 @@
+{% load static %}
+<div class="card flex flex-col items-center gap-3 py-10 text-center">
+    <img class="h-24 w-24 opacity-80"
+         src="{% static 'img/cat-256.webp' %}"
+         alt=""
+         width="96"
+         height="96">
+    <p class="muted text-sm">{{ text|default:"Пока пусто" }}</p>
+    {% if action_url %}<a class="btn btn-primary" href="{{ action_url }}">{{ action_label }}</a>{% endif %}
+</div>

@@ -1,8 +1,11 @@
-{% load static %}
-<div class="text-center my-4" id="cat-container">
-    <button class="btn btn-outline-pink" id="cat-button">Хочу котика!</button>
-    <p class="d-none cat-loading" id="cat-loading">Загрузка...</p>
-    <img class="d-none"
+{% load static ui %}
+<div class="mt-8 flex flex-col items-center gap-3" id="cat-container">
+    <button class="btn btn-ghost" id="cat-button">
+        {% icon "cat" "icon w-5 h-5" %}
+        <span>Хочу котика!</span>
+    </button>
+    <p class="muted hidden text-sm" id="cat-loading">Ищем котика...</p>
+    <img class="hidden max-w-full rounded-3xl shadow-lg"
          id="cat-image"
          width="300"
          height="300"

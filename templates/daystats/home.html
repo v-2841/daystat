@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static ui %}
+{% block title %}
+    DayStat
+{% endblock title %}
+{% block content %}
+    <section class="mb-7 flex items-center gap-4 sm:mb-9">
+        <img class="h-16 w-16 shrink-0 drop-shadow-sm sm:h-20 sm:w-20"
+             src="{% static 'img/cat-128.webp' %}"
+             alt=""
+             width="80"
+             height="80">
+        <div class="min-w-0">
+            <h1 class="page-title truncate">Привет, {{ user.first_name|default:user.username }}!</h1>
+            <p class="muted text-sm sm:text-base">{{ today_display }}</p>
+        </div>
+    </section>
+    <section class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" data-stagger>
+        <a class="card hover-lift col-span-2 flex items-center gap-4 lg:col-span-3"
+           href="{% url 'daystats:day' %}">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                  style="background: var(--accent-soft);
+                         color: var(--accent)">{% icon "notebook" "icon w-7 h-7" %}</span>
+            <span class="min-w-0 flex-1">
+                <span class="font-display block text-lg font-bold"
+                      style="color: var(--text-strong)">Дневник дня</span>
+                <span class="muted block text-sm">
+                    {% if daystat.weight or daystat.calories %}
+                        {% if daystat.weight %}{{ daystat.weight }} кг{% endif %}
+                        {% if daystat.weight and daystat.calories %}·{% endif %}
+                        {% if daystat.calories %}{{ daystat.calories }} ккал{% endif %}
+                        {% if period_day %}· день цикла {{ period_day }}{% endif %}
+                    {% else %}
+                        Сегодня ещё ничего не записано
+                    {% endif %}
+                </span>
+            </span>
+            <span class="shrink-0" style="color: var(--accent)">{% icon "arrow-right" "icon w-6 h-6" %}</span>
+        </a>
+        <a class="card hover-lift flex flex-col gap-3"
+           href="{% url 'daystats:calendar' %}">
+            <span class="flex items-center justify-between">
+                <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
+                      style="background: var(--accent-soft);
+                             color: var(--accent)">{% icon "calendar-dots" "icon w-6 h-6" %}</span>
+                {% if next_period.date %}
+                    <span class="badge {% if next_period.tone == 'overdue' %}badge-warn{% elif next_period.tone == 'today' %}badge-alert{% else %}badge-ok{% endif %}">
+                        {{ next_period.status }}
+                    </span>
+                {% endif %}
+            </span>
+            <span>
+                <span class="font-display block text-lg font-bold"
+                      style="color: var(--text-strong)">Календарь</span>
+                <span class="muted block text-sm">
+                    {% if period_day %}
+                        День цикла {{ period_day }}
+                    {% else %}
+                        Записи и прогноз цикла
+                    {% endif %}
+                </span>
+            </span>
+        </a>
+        <a class="card hover-lift flex flex-col gap-3"
+           href="{% url 'daystats:analytics' %}">
+            <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
+                  style="background: var(--accent-soft);
+                         color: var(--accent)">{% icon "chart-line-up" "icon w-6 h-6" %}</span>
+            <span>
+                <span class="font-display block text-lg font-bold"
+                      style="color: var(--text-strong)">Аналитика</span>
+                <span class="muted block text-sm">Вес, калории и цикл</span>
+            </span>
+        </a>
+        <a class="card hover-lift col-span-2 flex flex-col gap-3 lg:col-span-1"
+           href="{% url 'daystats:expenses' %}">
+            <span class="flex items-center justify-between">
+                <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
+                      style="background: var(--accent-soft);
+                             color: var(--accent)">{% icon "wallet" "icon w-6 h-6" %}</span>
+                <span class="stat-value text-2xl sm:text-2xl">{{ week_expenses|money }}</span>
+            </span>
+            <span>
+                <span class="font-display block text-lg font-bold"
+                      style="color: var(--text-strong)">Расходы</span>
+                <span class="muted block text-sm">С начала недели</span>
+            </span>
+        </a>
+    </section>
+{% endblock content %}

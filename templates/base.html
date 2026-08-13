@@ -1,61 +1,72 @@
-{% load static %}
+{% load static tailwind_cli %}
 <!DOCTYPE html>
 <html lang="ru">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="description" content="Статистика за день" />
         <meta name="keywords" content="статистика, калории, вес, расходы" />
+        <script>
+            (() => {
+                const stored = localStorage.getItem("daystat-theme");
+                const dark = stored
+                    ? stored === "dark"
+                    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+                document.documentElement.classList.toggle("dark", dark);
+            })();
+        </script>
         <link rel="apple-touch-icon"
               sizes="180x180"
               href="{% static 'img/apple-touch-icon.png' %}">
+        <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
         <link rel="icon"
               type="image/png"
               sizes="32x32"
               href="{% static 'img/favicon-32x32.png' %}">
-        <link rel="icon"
-              type="image/png"
-              sizes="16x16"
-              href="{% static 'img/favicon-16x16.png' %}">
-        <link rel="manifest" href={% static 'img/site.webmanifest' %}>
+        <link rel="manifest" href="{% static 'img/site.webmanifest' %}">
         <link rel="mask-icon"
               href="{% static 'img/safari-pinned-tab.svg' %}"
-              color="#fdc3f5">
-        <link rel="shortcut icon" href={% static 'img/favicon.ico' %}>
-        <meta name="msapplication-TileColor" content="#fdc3f5">
-        <meta name="msapplication-config"
-              content="{% static 'img/browserconfig.xml' %}">
-        <meta name="theme-color" content="#fdc3f5">
+              color="#991a7d">
+        <meta name="theme-color"
+              content="#fdd8f6"
+              media="(prefers-color-scheme: light)">
+        <meta name="theme-color"
+              content="#2c0724"
+              media="(prefers-color-scheme: dark)">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="DayStat">
         <title>
             {% block title %}
-                Место для заголовка
+                DayStat
             {% endblock title %}
         </title>
-        <link rel="stylesheet"
-              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-              rel="stylesheet"
-              integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-              crossorigin="anonymous">
-        <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+        {% tailwind_css %}
         {% block extrahead %}
         {% endblock extrahead %}
     </head>
-    <body class="d-flex flex-column min-vh-100">
+    <body class="flex min-h-dvh flex-col">
+        <div class="aurora" aria-hidden="true">
+            <span></span><span></span><span></span>
+        </div>
         <header>
             {% include "includes/header.html" %}
         </header>
-        <main class="container py-4">
+        <main class="mx-auto w-full max-w-5xl flex-1 px-3 py-6 sm:px-5 sm:py-8">
             {% block content %}
-                Место основного контента
             {% endblock content %}
-            {% include "includes/cat.html" %}
+            {% block cat %}
+                {% include "includes/cat.html" %}
+            {% endblock cat %}
         </main>
-        <footer class="mt-auto">
+        <footer>
             {% include "includes/footer.html" %}
         </footer>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-                integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-                crossorigin="anonymous"></script>
+        {% if request.user.is_authenticated %}
+            {% include "includes/tabbar.html" %}
+        {% endif %}
+        <script src="{% static 'js/app.js' %}"></script>
+        {% block extrabody %}
+        {% endblock extrabody %}
     </body>
 </html>

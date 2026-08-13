@@ -82,8 +82,10 @@ users' data.
 - Python 3.13+
 - Django 5.2
 - SQLite
-- Chart.js and FullCalendar on the frontend
-- Bootstrap 5 and Bootstrap Icons
+- Tailwind CSS 4 via `django-tailwind-cli` (standalone binary, no Node.js)
+- Chart.js with the Luxon adapter for charts, self-hosted
+- Phosphor duotone icons as a single SVG sprite
+- Self-hosted Nunito and Comfortaa fonts
 - Poetry for dependency management
 - Docker Compose with Gunicorn and Caddy for containerized deployment
 
@@ -127,10 +129,17 @@ Create an admin user:
 poetry run python manage.py createsuperuser
 ```
 
-Run the development server:
+Run the development server together with the Tailwind watcher:
 
 ```bash
-poetry run python manage.py runserver
+poetry run python manage.py tailwind runserver
+```
+
+The first run downloads the standalone Tailwind CLI into `.django_tailwind_cli/`.
+To build the stylesheet once (for example before `collectstatic`):
+
+```bash
+poetry run python manage.py tailwind build
 ```
 
 Open the app at:
@@ -172,16 +181,35 @@ docker compose logs -f app
 
 ## Main Routes
 
-- `/` - today's daily record.
+- `/` - home screen with tiles for every section.
+- `/day/` - today's daily record.
 - `/daystats/<YYYY-MM-DD>/` - archived daily record.
 - `/calendar/` - calendar and cycle prediction.
-- `/chart/` - weight and calories chart.
-- `/cycle_weight_chart/` - cycle length and weight chart.
-- `/calories_summary/` - weekly calories averages.
+- `/analytics/` - charts and weekly summaries (`?tab=trends|cycle|weeks`).
 - `/expenses/` - expense tracker.
 - `/expenses/weeks/` - weekly expense summary.
 - `/expenses/months/` - monthly expense summary.
 - `/admin/` - Django admin.
+
+The old chart routes (`/chart/`, `/cycle_weight_chart/`, `/calories_summary/`)
+redirect to the matching analytics tab.
+
+## Frontend
+
+The interface is a pastel "liquid glass" theme with light and dark modes.
+Design tokens (colors, surfaces, radii, motion) live in
+`staticfiles/css/source.css` inside the Tailwind `@theme` and `@layer base`
+blocks; the compiled result is written to `staticfiles/css/tailwind.css`, which
+is generated and therefore not tracked by Git.
+
+- The theme follows the system setting and can be overridden with the header
+  toggle; the choice is stored in `localStorage`.
+- Navigation is a glass header on wide screens and a bottom tab bar on narrow
+  ones.
+- The calendar is a server-rendered month grid: values are shown inside the
+  cells on wide screens and as colored dots with a detail sheet on phones.
+- Icons come from `staticfiles/img/sprite.svg` and are rendered by the
+  `{% icon "name" %}` template tag.
 
 ## Development Commands
 
@@ -242,5 +270,7 @@ poetry check
 - The default database is `db.sqlite3`.
 - Runtime static files are collected into `static/`.
 - Source static assets live in `staticfiles/`.
+- `staticfiles/css/tailwind.css` and `.django_tailwind_cli/` are build
+  artifacts and are ignored by Git.
 - Local secrets, virtual environments, collected static files, and SQLite
   database files are ignored by Git.

@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'django_tailwind_cli',
     'core.apps.CoreConfig',
     'daystats.apps.DaystatsConfig',
     'users.apps.UsersConfig',
@@ -54,6 +55,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.year.year',
+                'core.context_processors.nav.nav',
             ],
         },
     },
@@ -107,6 +109,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+TAILWIND_CLI_SRC_CSS = os.path.join(BASE_DIR, 'staticfiles', 'css', 'source.css')
+TAILWIND_CLI_DIST_CSS = 'css/tailwind.css'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = [i.strip() for i in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if i.strip()]
@@ -114,7 +119,7 @@ CSRF_TRUSTED_ORIGINS = [i.strip() for i in os.getenv('CSRF_TRUSTED_ORIGINS', '')
 SESSION_SAVE_EVERY_REQUEST = True
 
 LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'daystats:today'
+LOGIN_REDIRECT_URL = 'daystats:home'
 
 INTERNAL_IPS = [
     '127.0.0.1',

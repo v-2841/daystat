@@ -25,6 +25,10 @@ ENV PATH="/app/.venv/bin:${PATH}" \
 COPY . /app
 COPY --from=base /app/.venv /app/.venv
 
+# build the stylesheet at image build time so startup stays fast
+RUN python manage.py tailwind build \
+    && rm -rf /app/.django_tailwind_cli
+
 RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

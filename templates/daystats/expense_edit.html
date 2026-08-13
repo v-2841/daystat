@@ -1,68 +1,54 @@
 {% extends "base.html" %}
-{% load user_filters %}
+{% load ui %}
 {% block title %}
     Редактировать расход
 {% endblock title %}
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header text-light">Редактировать расход</div>
-                <div class="card-body">
-                    {% if form.errors %}
-                        {% for field in form %}
-                            {% for error in field.errors %}<div class="alert alert-danger">{{ field.label }}: {{ error|escape }}</div>{% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error|escape }}</div>{% endfor %}
-                    {% endif %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label" for="id_value">
-                                Сумма<span class="required text-danger">*</span>
-                            </label>
-                            {{ form.value|addclass:'form-control' }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_note">Примечание</label>
-                            {{ form.note|addclass:'form-control' }}
-                        </div>
-                        <div class="text-center mb-3">
-                            <button type="submit" class="btn btn-pink">Сохранить изменения</button>
-                        </div>
-                    </form>
-                    <div class="text-center">
-                        <button type="button"
-                                class="btn btn-outline-pink"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteModal">Удалить</button>
-                    </div>
-                    <div class="modal fade"
-                         id="deleteModal"
-                         tabindex="-1"
-                         aria-labelledby="deleteModalLabel"
-                         aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="deleteModalLabel">Удалить запись?</h1>
-                                    <button type="button"
-                                            class="btn-close"
-                                            data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-pink" data-bs-dismiss="modal">Отмена</button>
-                                    <form method="post" action="{% url 'daystats:expense_delete' expense.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-pink">Удалить</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="mx-auto max-w-md">
+        <h1 class="page-title mb-4">Расход</h1>
+        {% if form.errors %}
+            <div class="alert alert-error mb-3">
+                {% for field in form %}
+                    {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
             </div>
-        </div>
+        {% endif %}
+        <form method="post" class="card space-y-3">
+            {% csrf_token %}
+            <p class="muted text-sm">{{ expense.created_at|date:"j E Y, H:i" }}</p>
+            <div>
+                <label class="field-label" for="{{ form.value.id_for_label }}">Сумма</label>
+                {{ form.value|field_class:"field tabular-nums" }}
+            </div>
+            <div>
+                <label class="field-label" for="{{ form.note.id_for_label }}">Примечание</label>
+                {{ form.note|field_class:"field" }}
+            </div>
+            <div class="flex flex-col gap-2 pt-1 sm:flex-row">
+                <button class="btn btn-primary flex-1" type="submit">
+                    {% icon "floppy-disk" "icon w-5 h-5" %}
+                    <span>Сохранить</span>
+                </button>
+                <button class="btn btn-ghost" type="button" data-dialog-open="delete-dialog">
+                    {% icon "trash" "icon w-5 h-5" %}
+                    <span>Удалить</span>
+                </button>
+            </div>
+        </form>
     </div>
+    <dialog class="glass glass-strong glass-sheen w-[min(24rem,92vw)] p-6 backdrop:bg-black/40 backdrop:backdrop-blur-sm"
+            id="delete-dialog">
+        <h2 class="font-display mb-2 text-lg font-bold">Удалить запись?</h2>
+        <p class="muted mb-4 text-sm">Это действие нельзя отменить.</p>
+        <div class="flex gap-2">
+            <button class="btn btn-ghost flex-1" type="button" data-dialog-close>Отмена</button>
+            <form method="post"
+                  class="flex-1"
+                  action="{% url 'daystats:expense_delete' expense.id %}">
+                {% csrf_token %}
+                <button class="btn btn-danger w-full" type="submit">Удалить</button>
+            </form>
+        </div>
+    </dialog>
 {% endblock content %}

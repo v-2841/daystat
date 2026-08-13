@@ -1,0 +1,14 @@
+{% load ui %}
+<nav class="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 lg:hidden"
+     aria-label="Основная навигация">
+    <div class="glass glass-strong glass-sheen safe-bottom mx-auto flex max-w-md items-stretch gap-1 p-1.5">
+        {% for item in nav_items %}
+            <a class="tab-link"
+               href="{{ item.url }}"
+               {% if item.active %}aria-current="page"{% endif %}>
+                {% icon item.icon "icon w-6 h-6" %}
+                <span>{{ item.short|default:item.label }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</nav>

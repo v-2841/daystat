@@ -1,42 +1,41 @@
 {% extends "base.html" %}
-{% load user_filters %}
+{% load static ui %}
 {% block title %}
-    Войти
+    Вход
 {% endblock title %}
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header text-light">Войти на сайт</div>
-                <div class="card-body">
-                    {% if form.errors %}
-                        {% for field in form %}
-                            {% for error in field.errors %}<div class="alert alert-danger">{{ field.label }}: {{ error|escape }}</div>{% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error|escape }}</div>{% endfor %}
-                    {% endif %}
-                    <form method="post"
-                          {% if action_url %} action="{% url action_url %}" {% endif %}>
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="mb-3"
-                                 {% if field.field.required %} aria-required="true" {% else %} aria-required="false" {% endif %}>
-                                <label class="form-label" for="{{ field.id_for_label }}">
-                                    {{ field.label }}
-                                    {% if field.field.required %}<span class="required text-danger">*</span>{% endif %}
-                                </label>
-                                {{ field|addclass:'form-control' }}
-                                {% if field.help_text %}
-                                    <small id="{{ field.id_for_label }}-help" class="form-text text-muted">{{ field.help_text|safe }}</small>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-pink mt-2 mb-2">Войти</button>
-                        </div>
-                    </form>
+    <div class="mx-auto flex max-w-sm flex-col items-center py-6">
+        <img class="mb-4 h-24 w-24"
+             src="{% static 'img/cat-256.webp' %}"
+             alt=""
+             width="96"
+             height="96">
+        <h1 class="page-title mb-1">DayStat</h1>
+        <p class="muted mb-5 text-sm">Дневник веса, калорий и расходов</p>
+        <div class="card w-full">
+            {% if form.errors %}
+                <div class="alert alert-error mb-3">
+                    {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
+                    {% for field in form %}
+                        {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
+                    {% endfor %}
                 </div>
-            </div>
+            {% endif %}
+            <form method="post" class="space-y-3">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div>
+                        <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field|field_class:"field" }}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-primary w-full" type="submit">
+                    {% icon "paw-print" "icon w-5 h-5" %}
+                    <span>Войти</span>
+                </button>
+            </form>
         </div>
     </div>
 {% endblock content %}
+{% block cat %}
+{% endblock cat %}

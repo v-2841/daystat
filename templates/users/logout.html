@@ -1,19 +1,24 @@
 {% extends "base.html" %}
+{% load static ui %}
 {% block title %}
-    Вы вышли из системы
+    Вы вышли
 {% endblock title %}
 {% block content %}
-    <div class="row justify-content-center">
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header text-light">Выход</div>
-                <div class="card-body">
-                    <p>Вы вышли из своей учётной записи. Ждём вас снова!</p>
-                    <div class="text-center">
-                        <a class="btn btn-pink" href="{% url 'users:login' %}">Войти</a>
-                    </div>
-                </div>
-            </div>
+    <div class="mx-auto flex max-w-sm flex-col items-center gap-4 py-10 text-center">
+        <img class="h-28 w-28"
+             src="{% static 'img/cat-256.webp' %}"
+             alt=""
+             width="112"
+             height="112">
+        <div>
+            <h1 class="page-title">До встречи!</h1>
+            <p class="muted mt-1">Вы вышли из учётной записи.</p>
         </div>
+        <a class="btn btn-primary" href="{% url 'users:login' %}">
+            {% icon "paw-print" "icon w-5 h-5" %}
+            <span>Войти снова</span>
+        </a>
     </div>
 {% endblock content %}
+{% block cat %}
+{% endblock cat %}

@@ -1,15 +1,24 @@
 {% extends "base.html" %}
-{% load user_filters static %}
+{% load static ui %}
 {% block title %}
-    Будущее неизвестно...
+    Будущее неизвестно
 {% endblock title %}
 {% block content %}
-    <div class="text-center py-md-5 py-3">
-        <h1>Будущее неизвестно...</h1>
-        <h5>{{ date }}</h5>
-        <a href="{% url 'daystats:today' %}">Вернуться на главную</a>
-    </div>
-    <div class="text-center">
-        <img src="{% static 'img/cat.png' %}" alt="cat" width="192" height="192">
+    <div class="mx-auto flex max-w-md flex-col items-center gap-4 py-8 text-center">
+        <img class="h-32 w-32 animate-rise"
+             src="{% static 'img/cat-256.webp' %}"
+             alt=""
+             width="128"
+             height="128">
+        <div>
+            <h1 class="page-title">Будущее неизвестно</h1>
+            <p class="muted mt-1">{{ date_display }} ещё не наступило — записывать пока нечего.</p>
+        </div>
+        <a class="btn btn-primary" href="{% url 'daystats:day' %}">
+            {% icon "notebook" "icon w-5 h-5" %}
+            <span>К сегодняшнему дню</span>
+        </a>
     </div>
 {% endblock content %}
+{% block cat %}
+{% endblock cat %}

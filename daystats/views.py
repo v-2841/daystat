@@ -1,8 +1,9 @@
+import calendar as calendar_module
 import datetime
 from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from django.db.models.functions import ExtractYear
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -25,7 +26,7 @@ MONTH_NAMES = {
     2: 'февраль',
     3: 'март',
     4: 'апрель',
-    5: 'май',
+    5: 'май',
     6: 'июнь',
     7: 'июль',
     8: 'август',
@@ -34,12 +35,31 @@ MONTH_NAMES = {
     11: 'ноябрь',
     12: 'декабрь',
 }
+MONTH_NAMES_GENITIVE = {
+    1: 'января',
+    2: 'февраля',
+    3: 'марта',
+    4: 'апреля',
+    5: 'мая',
+    6: 'июня',
+    7: 'июля',
+    8: 'августа',
+    9: 'сентября',
+    10: 'октября',
+    11: 'ноября',
+    12: 'декабря',
+}
+WEEKDAY_NAMES = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
 PREDICTION_HORIZON = datetime.timedelta(days=365)
 SMOOTHING_WINDOWS = {
     '6months': 5,
     'year': 10,
     '5years': 20,
 }
+
+
+def format_date(date):
+    return f'{date.day} {MONTH_NAMES_GENITIVE[date.month]} {date.year}'
 
 
 def moving_average(points, window_size):
@@ -145,15 +165,69 @@ def predict_period_dates(user, include_past=False):
     return []
 
 
+def get_period_day(user, date):
+    last_period = Daystat.objects.filter(
+        user=user,
+        period_start=True,
+        date__lte=date,
+    ).order_by('-date').first()
+    if last_period:
+        return (date - last_period.date).days + 1
+    return None
+
+
+def get_next_period_summary(user):
+    next_period_date = predict_next_period_date(user)
+    if not next_period_date:
+        return {'date': None, 'status': 'нет данных', 'tone': 'muted'}
+
+    delta_days = (next_period_date - timezone.localdate()).days
+    if delta_days > 0:
+        status = f'через {delta_days} дн.'
+        tone = 'upcoming'
+    elif delta_days < 0:
+        status = f'задержка {abs(delta_days)} дн.'
+        tone = 'overdue'
+    else:
+        status = 'сегодня'
+        tone = 'today'
+    return {'date': next_period_date, 'status': status, 'tone': tone}
+
+
 @login_required
-def today(request, date=None):
+def home(request):
+    user = request.user
+    today_date = timezone.localdate()
+    daystat = Daystat.objects.filter(user=user, date=today_date).first()
+    week_start = today_date - datetime.timedelta(days=today_date.weekday())
+    week_expenses = Expense.objects.filter(
+        user=user,
+        created_at__gte=timezone.make_aware(
+            datetime.datetime.combine(week_start, datetime.time.min),
+        ),
+    ).aggregate(total=Sum('value'))['total'] or 0
+
+    context = {
+        'today_date': today_date,
+        'today_display': format_date(today_date),
+        'daystat': daystat,
+        'period_day': get_period_day(user, today_date),
+        'next_period': get_next_period_summary(user),
+        'week_expenses': week_expenses,
+    }
+    return render(request, 'daystats/home.html', context)
+
+
+@login_required
+def day(request, date=None):
     if date:
         date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
         if date == timezone.localdate():
-            return redirect('daystats:today')
+            return redirect('daystats:day')
         elif date > timezone.localdate():
             context = {
                 'date': date,
+                'date_display': format_date(date),
             }
             return render(request, 'daystats/future_day.html', context)
     else:
@@ -168,119 +242,145 @@ def today(request, date=None):
         if form.is_valid():
             form.save()
             if request.resolver_match.view_name == 'daystats:daystats':
-                return redirect('daystats:daystats',
-                                date=date.strftime('%Y-%m-%d'))
-            return redirect('daystats:today')
+                return redirect(
+                    f'{request.path}?saved=1',
+                )
+            return redirect(f"{request.path}?saved=1")
         else:
             daystat.refresh_from_db()
     else:
         form = DaystatForm(instance=daystat)
 
-    last_period = Daystat.objects.filter(
-        user=request.user,
-        period_start=True,
-        date__lte=date,
-    ).order_by('-date').first()
-    if last_period:
-        period_day = (date - last_period.date).days + 1
-    else:
-        period_day = '-'
-
+    is_today = date == timezone.localdate()
     context = {
         'date': date,
+        'date_display': format_date(date),
+        'is_today': is_today,
         'yesterday': date - datetime.timedelta(days=1),
         'tomorrow': (date + datetime.timedelta(days=1)
-                     if date != timezone.localdate() else ''),
+                     if not is_today else None),
         'daystat': daystat,
         'form': form,
-        'period_day': period_day,
+        'period_day': get_period_day(request.user, date),
+        'saved': request.GET.get('saved') == '1',
     }
-    return render(request, 'daystats/today.html', context)
+    return render(request, 'daystats/day.html', context)
 
 
 @login_required
 def calendar(request):
-    next_period_date = predict_next_period_date(request.user)
-    if next_period_date:
-        next_period_date_display = next_period_date.strftime('%d.%m.%Y')
-        delta_days = (next_period_date - timezone.localdate()).days
-        if delta_days > 0:
-            next_period_status = f'осталось {delta_days} дн.'
-        elif delta_days < 0:
-            next_period_status = f'задержка на {abs(delta_days)} дн.'
-        else:
-            next_period_status = 'сегодня'
-    else:
-        next_period_date_display = '-'
-        next_period_status = '-'
+    today_date = timezone.localdate()
+    try:
+        year, month = (int(part)
+                       for part in request.GET.get('month', '').split('-'))
+        datetime.date(year, month, 1)
+    except (ValueError, TypeError):
+        year, month = today_date.year, today_date.month
+
+    first_day = datetime.date(year, month, 1)
+    last_day = datetime.date(
+        year, month, calendar_module.monthrange(year, month)[1],
+    )
+    grid = calendar_module.Calendar(firstweekday=0).monthdatescalendar(
+        year, month,
+    )
+    grid_start, grid_end = grid[0][0], grid[-1][-1]
+
+    daystats = {
+        daystat.date: daystat
+        for daystat in Daystat.objects.filter(
+            user=request.user,
+            date__gte=grid_start,
+            date__lte=grid_end,
+        )
+    }
+    predicted = {
+        date for date in predict_period_dates(request.user, include_past=True)
+        if grid_start <= date <= grid_end
+    }
+
+    weeks = []
+    for row in grid:
+        week = []
+        for date in row:
+            daystat = daystats.get(date)
+            has_data = bool(
+                daystat and (daystat.weight or daystat.calories
+                             or daystat.period_start)
+            )
+            week.append({
+                'date': date,
+                'day': date.day,
+                'in_month': date.month == month,
+                'is_today': date == today_date,
+                'is_future': date > today_date,
+                'weight': daystat.weight if daystat else None,
+                'calories': daystat.calories if daystat else None,
+                'period_start': bool(daystat and daystat.period_start),
+                'predicted': date in predicted and not (
+                    daystat and daystat.period_start
+                ),
+                'predicted_overdue': date in predicted and date < today_date,
+                'has_data': has_data,
+                'display': format_date(date),
+            })
+        weeks.append(week)
+
+    prev_month = (first_day - datetime.timedelta(days=1)).strftime('%Y-%m')
+    next_month = (last_day + datetime.timedelta(days=1)).strftime('%Y-%m')
+
+    month_stats = Daystat.objects.filter(
+        user=request.user,
+        date__gte=first_day,
+        date__lte=last_day,
+    ).aggregate(avg_weight=Avg('weight'), avg_calories=Avg('calories'))
 
     context = {
-        'next_period_date': next_period_date_display,
-        'next_period_status': next_period_status,
+        'weeks': weeks,
+        'weekday_names': WEEKDAY_NAMES,
+        'month_title': f'{MONTH_NAMES[month].capitalize()} {year}',
+        'prev_month': prev_month,
+        'next_month': next_month,
+        'current_month': f'{year:04d}-{month:02d}',
+        'is_current_month': (year, month) == (today_date.year,
+                                              today_date.month),
+        'next_period': get_next_period_summary(request.user),
+        'period_day': get_period_day(request.user, today_date),
+        'avg_weight': month_stats['avg_weight'],
+        'avg_calories': month_stats['avg_calories'],
     }
     return render(request, 'daystats/calendar.html', context)
 
 
 @login_required
-def calendar_api(request):
-    data = []
-    today = timezone.localdate()
-    start = datetime.datetime.fromisoformat(request.GET.get('start')).date()
-    end = datetime.datetime.fromisoformat(request.GET.get('end')).date()
-    daystats = Daystat.objects.filter(
-        user=request.user,
-        date__gte=start,
-        date__lte=end,
-    )
-    for daystat in daystats:
-        if daystat.period_start:
-            data.append({
-                'start': daystat.date.strftime('%Y-%m-%d'),
-                'title': 'Цикл',
-                'backgroundColor': 'rgba(255, 0, 0, 0.2)',
-                'borderColor': 'rgba(255, 0, 0, 1)',
-            })
-        data.append({
-            'start': daystat.date.strftime('%Y-%m-%d'),
-            'title': f'{daystat.weight if daystat.weight else "-"}',
-            'backgroundColor': 'rgba(255, 0, 255, 0.2)',
-            'borderColor': 'rgba(255, 0, 255, 1)',
-        })
-        data.append({
-            'start': daystat.date.strftime('%Y-%m-%d'),
-            'title': f'{daystat.calories if daystat.calories else "-"}',
-            'backgroundColor': 'rgba(0, 0, 255, 0.2)',
-            'borderColor': 'rgba(0, 0, 255, 1)',
-        })
-    for next_period_date in predict_period_dates(
-        request.user,
-        include_past=True,
-    ):
-        if not (start <= next_period_date <= end):
-            continue
-        if next_period_date < today:
-            background_color = 'rgba(255, 235, 59, 0.45)'
-            border_color = 'rgba(255, 193, 7, 1)'
-        else:
-            background_color = 'rgba(144, 238, 144, 0.45)'
-            border_color = 'rgba(46, 139, 87, 1)'
-        data.append({
-            'start': next_period_date.strftime('%Y-%m-%d'),
-            'title': 'Цикл',
-            'backgroundColor': background_color,
-            'borderColor': border_color,
-        })
-    return JsonResponse(data, safe=False)
+def analytics(request):
+    tab = request.GET.get('tab', 'trends')
+    if tab not in ('trends', 'cycle', 'weeks'):
+        tab = 'trends'
 
+    context = {'tab': tab}
+    if tab == 'weeks':
+        weekly_avg_calories = (
+            Daystat.objects
+            .filter(
+                user=request.user,
+                calories__gt=0,
+            )
+            .annotate(
+                year=ExtractYear('date'),
+            )
+            .values('year', 'week')
+            .annotate(avg_calories=Avg('calories'))
+            .order_by('-year', '-week')
+        )
 
-@login_required
-def chart(request):
-    return render(request, 'daystats/chart.html')
-
-
-@login_required
-def cycle_weight_chart(request):
-    return render(request, 'daystats/cycle_weight_chart.html')
+        data = defaultdict(dict)
+        for entry in weekly_avg_calories:
+            data[entry['year']][entry['week']] = {
+                'avg_calories': entry['avg_calories'],
+            }
+        context['data'] = {year: weeks for year, weeks in data.items()}
+    return render(request, 'daystats/analytics.html', context)
 
 
 @login_required
@@ -334,34 +434,6 @@ def cycle_weight_chart_api(request):
 
 
 @login_required
-def calories_summary(request):
-    weekly_avg_calories = (
-        Daystat.objects
-        .filter(
-            user=request.user,
-            calories__gt=0,
-        )
-        .annotate(
-            year=ExtractYear('date'),
-        )
-        .values('year', 'week')
-        .annotate(avg_calories=Avg('calories'))
-        .order_by('-year', '-week')
-    )
-
-    data = defaultdict(lambda: defaultdict(dict))
-    for entry in weekly_avg_calories:
-        data[entry['year']][entry['week']] = {
-            'avg_calories': entry['avg_calories']}
-    data = {year: dict(weeks) for year, weeks in data.items()}
-
-    context = {
-        'data': data,
-    }
-    return render(request, 'daystats/calories_summary.html', context)
-
-
-@login_required
 def expenses(request):
     last_week_expenses = Expense.objects.filter(
         user=request.user,
@@ -372,10 +444,15 @@ def expenses(request):
         expense = form.save(commit=False)
         expense.user = request.user
         expense.save()
-        return redirect('daystats:expenses')
+        return redirect(f"{request.path}?saved=1")
     context = {
         'last_week_expenses': last_week_expenses,
+        'week_total': sum(
+            expense.value for expense in last_week_expenses
+        ),
         'form': form,
+        'tab': 'list',
+        'saved': request.GET.get('saved') == '1',
     }
     return render(request, 'daystats/expenses.html', context)
 
@@ -411,73 +488,49 @@ def expense_delete(request, pk):
     return redirect('daystats:expenses')
 
 
+def group_expenses(expenses, key_func):
+    grouped = defaultdict(lambda: defaultdict(list))
+    for expense in expenses:
+        local_time = timezone.localtime(expense.created_at)
+        year, key = key_func(local_time)
+        grouped[year][key].append(expense)
+
+    data = {}
+    for year, groups in grouped.items():
+        data[year] = {}
+        for key, items in groups.items():
+            notes = ', '.join(item.note for item in items if item.note)
+            data[year][key] = {
+                'sum_value': sum(item.value for item in items),
+                'notes': notes,
+                'count': len(items),
+            }
+    return data
+
+
 @login_required
 def expenses_weeks(request):
     expenses = Expense.objects.filter(user=request.user)
-    expenses_list = []
-    for expense in expenses:
-        local_time = timezone.localtime(expense.created_at)
-        expenses_list.append({
-            'year': local_time.year,
-            'week': int(local_time.strftime('%W')),
-            'value': expense.value,
-            'note': expense.note,
-        })
-
-    grouped_data = defaultdict(lambda: defaultdict(list))
-    for expense in expenses_list:
-        grouped_data[expense['year']][expense['week']].append(
-            {'value': expense['value'], 'note': expense['note']})
-    data = {year: dict(weeks) for year, weeks in grouped_data.items()}
-
-    for year, weeks in data.items():
-        for week, expenses in weeks.items():
-            sum_value = sum(
-                [expense['value'] for expense in expenses])
-            notes = ', '.join(
-                [expense['note'] for expense in expenses if expense['note']])
-            data[year][week] = {
-                'sum_value': sum_value,
-                'notes': notes,
-            }
-
     context = {
-        'data': data,
+        'data': group_expenses(
+            expenses,
+            lambda dt: (dt.year, int(dt.strftime('%W'))),
+        ),
+        'tab': 'weeks',
+        'unit_label': 'Неделя',
     }
-    return render(request, 'daystats/expenses_weeks.html', context)
+    return render(request, 'daystats/expenses_summary.html', context)
 
 
 @login_required
 def expenses_months(request):
     expenses = Expense.objects.filter(user=request.user)
-    expenses_list = []
-    for expense in expenses:
-        local_time = timezone.localtime(expense.created_at)
-        expenses_list.append({
-            'year': local_time.year,
-            'month': MONTH_NAMES[local_time.month],
-            'value': expense.value,
-            'note': expense.note,
-        })
-
-    grouped_data = defaultdict(lambda: defaultdict(list))
-    for expense in expenses_list:
-        grouped_data[expense['year']][expense['month']].append(
-            {'value': expense['value'], 'note': expense['note']})
-    data = {year: dict(month) for year, month in grouped_data.items()}
-
-    for year, months in data.items():
-        for month, expenses in months.items():
-            sum_value = sum(
-                [expense['value'] for expense in expenses])
-            notes = ', '.join(
-                [expense['note'] for expense in expenses if expense['note']])
-            data[year][month] = {
-                'sum_value': sum_value,
-                'notes': notes,
-            }
-
     context = {
-        'data': data,
+        'data': group_expenses(
+            expenses,
+            lambda dt: (dt.year, MONTH_NAMES[dt.month]),
+        ),
+        'tab': 'months',
+        'unit_label': 'Месяц',
     }
-    return render(request, 'daystats/expenses_months.html', context)
+    return render(request, 'daystats/expenses_summary.html', context)

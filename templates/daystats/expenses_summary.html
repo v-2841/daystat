@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}
+    Расходы {% if tab == 'weeks' %}по неделям{% else %}по месяцам{% endif %}
+{% endblock title %}
+{% block content %}
+    <h1 class="page-title mb-4">Расходы</h1>
+    {% include "includes/expenses_tabs.html" %}
+    <section class="space-y-5">
+        {% for year, groups in data.items %}
+            <div class="card p-0 sm:p-0">
+                <h2 class="px-5 pt-5 text-lg">{{ year }}</h2>
+                <table class="data-table mt-2 hidden sm:table">
+                    <thead>
+                        <tr>
+                            <th>{{ unit_label }}</th>
+                            <th class="text-end">Сумма</th>
+                            <th>Примечания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, item in groups.items %}
+                            <tr>
+                                <td class="whitespace-nowrap capitalize">{{ key }}</td>
+                                <td class="text-end font-bold tabular-nums"
+                                    style="color: var(--text-strong)">{{ item.sum_value|money }}</td>
+                                <td class="muted max-w-md truncate" title="{{ item.notes }}">{{ item.notes|default:"—" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="mt-2 sm:hidden">
+                    {% for key, item in groups.items %}
+                        <div class="list-row">
+                            <span class="min-w-0">
+                                <span class="font-display block font-bold capitalize"
+                                      style="color: var(--text-strong)">
+                                    {% if unit_label == 'Неделя' %}Неделя{% endif %}{{ key }}
+                                </span>
+                                <span class="muted block truncate text-xs">{{ item.notes|default:"—" }}</span>
+                            </span>
+                            <span class="font-display shrink-0 font-bold tabular-nums"
+                                  style="color: var(--accent)">{{ item.sum_value|money }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="h-5"></div>
+            </div>
+        {% empty %}
+            {% include "includes/empty.html" with text="Расходов пока нет" %}
+        {% endfor %}
+    </section>
+{% endblock content %}

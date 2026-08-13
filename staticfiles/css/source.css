@@ -1,0 +1,842 @@
+@import "tailwindcss";
+
+@source "../../templates";
+@source "../js";
+
+/* ---------------------------------------------------------------- fonts */
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+    src: url('../fonts/nunito-cyrillic.woff2') format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+    src: url('../fonts/nunito-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Comfortaa';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('../fonts/comfortaa-cyrillic.woff2') format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+    font-family: 'Comfortaa';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('../fonts/comfortaa-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* --------------------------------------------------------------- tokens */
+@theme {
+    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Comfortaa', 'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+    /* brand ramp: pastel surface -> deep berry accent */
+    --color-berry-50: #fff5fc;
+    --color-berry-100: #ffe7f8;
+    --color-berry-200: #fdc3f5;
+    --color-berry-300: #f49ce4;
+    --color-berry-400: #de77cc;
+    --color-berry-500: #c256ad;
+    --color-berry-600: #a5348d;
+    --color-berry-700: #991a7d;
+    --color-berry-800: #70125c;
+    --color-berry-900: #4c0c3e;
+    --color-berry-950: #2c0724;
+
+    /* companion hues for data & states */
+    --color-mint-400: #34c9a3;
+    --color-mint-600: #0e9a7a;
+    --color-sun-400: #f5b544;
+    --color-sun-600: #c98707;
+    --color-sky-400: #58a6f5;
+    --color-sky-600: #2b6fc4;
+
+    --radius-glass: 1.5rem;
+
+    --ease-spring: linear(
+        0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%,
+        0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%,
+        1.001
+    );
+}
+
+/* semantic surface tokens: light theme is the base definition */
+@layer base {
+    :root {
+        color-scheme: light;
+
+        --surface-page: linear-gradient(
+            170deg,
+            #fff7fd 0%,
+            #ffeafa 38%,
+            #fdd8f6 72%,
+            #f6cdf2 100%
+        );
+        --surface-glass: rgb(255 255 255 / 0.58);
+        --surface-glass-strong: rgb(255 255 255 / 0.78);
+        --surface-glass-soft: rgb(255 255 255 / 0.38);
+        --surface-sunken: rgb(153 26 125 / 0.06);
+        --surface-solid: rgb(255 247 253 / 0.96);
+        --glass-border: rgb(255 255 255 / 0.65);
+        --glass-ring: rgb(153 26 125 / 0.1);
+        --glass-shadow: 0 18px 45px -22px rgb(76 12 62 / 0.45);
+        --glass-blur: 18px;
+
+        --text-strong: #4c0c3e;
+        --text-body: #6b3a5e;
+        /* darker than it looks it needs to be: muted text also sits directly
+           on the page gradient, where contrast is lowest */
+        --text-muted: #7e5570;
+        --accent: #991a7d;
+        --accent-contrast: #ffffff;
+        --accent-soft: rgb(153 26 125 / 0.12);
+
+        --status-ok: #0a6e57;
+        --status-ok-bg: rgb(52 201 163 / 0.2);
+        --status-warn: #8a5c04;
+        --status-warn-bg: rgb(245 181 68 / 0.24);
+        --status-alert: #a8244f;
+        --status-alert-bg: rgb(214 51 108 / 0.16);
+
+        --blob-1: rgb(253 195 245 / 0.85);
+        --blob-2: rgb(153 26 125 / 0.18);
+        --blob-3: rgb(88 166 245 / 0.16);
+    }
+
+    :root.dark {
+        color-scheme: dark;
+
+        --surface-page: linear-gradient(
+            170deg,
+            #1b0718 0%,
+            #2c0724 42%,
+            #351029 74%,
+            #1d0918 100%
+        );
+        --surface-glass: rgb(255 214 246 / 0.07);
+        --surface-glass-strong: rgb(255 214 246 / 0.12);
+        --surface-glass-soft: rgb(255 214 246 / 0.04);
+        --surface-sunken: rgb(0 0 0 / 0.22);
+        --surface-solid: rgb(46 14 38 / 0.96);
+        --glass-border: rgb(255 214 246 / 0.14);
+        --glass-ring: rgb(255 214 246 / 0.08);
+        --glass-shadow: 0 20px 50px -24px rgb(0 0 0 / 0.75);
+
+        --text-strong: #fde5f8;
+        --text-body: #e6c2dd;
+        --text-muted: #b389a6;
+        --accent: #f9a8e0;
+        --accent-contrast: #2c0724;
+        --accent-soft: rgb(249 168 224 / 0.16);
+
+        --status-ok: #7be6c8;
+        --status-ok-bg: rgb(52 201 163 / 0.16);
+        --status-warn: #ffd489;
+        --status-warn-bg: rgb(245 181 68 / 0.16);
+        --status-alert: #ffa8c5;
+        --status-alert-bg: rgb(214 51 108 / 0.2);
+
+        --blob-1: rgb(153 26 125 / 0.5);
+        --blob-2: rgb(222 119 204 / 0.22);
+        --blob-3: rgb(43 111 196 / 0.22);
+    }
+
+    html {
+        -webkit-tap-highlight-color: transparent;
+        /* the page gradient is fixed, so html carries it past the viewport */
+        background: var(--surface-page);
+    }
+
+    body {
+        background: var(--surface-page);
+        background-attachment: fixed;
+        color: var(--text-body);
+        font-family: var(--font-sans);
+        min-height: 100dvh;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: var(--font-display);
+        color: var(--text-strong);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    ::selection {
+        background: var(--accent);
+        color: var(--accent-contrast);
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    input, select, textarea, button {
+        font-family: inherit;
+    }
+
+    /* Preflight zeroes margins, which is what centers a modal <dialog> */
+    dialog {
+        margin: auto;
+    }
+
+    /* hide number spinners: values are typed, not stepped */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+}
+
+/* ----------------------------------------------------------- components */
+@layer components {
+    /* --- liquid glass surfaces --- */
+    .glass {
+        background: var(--surface-glass);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 rgb(255 255 255 / 0.35);
+        backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+        border-radius: var(--radius-glass);
+        position: relative;
+    }
+
+    .glass-strong {
+        background: var(--surface-glass-strong);
+    }
+
+    .glass-soft {
+        background: var(--surface-glass-soft);
+    }
+
+    /* opaque enough to sit above content without it bleeding through */
+    .glass-solid {
+        background: var(--surface-solid);
+    }
+
+    /* specular highlight along the top edge, the "liquid" tell */
+    .glass-sheen::before,
+    .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+            150deg,
+            rgb(255 255 255 / 0.75),
+            rgb(255 255 255 / 0) 42%,
+            rgb(255 255 255 / 0) 62%,
+            rgb(255 255 255 / 0.35)
+        );
+        -webkit-mask: linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        mask-composite: exclude;
+        pointer-events: none;
+    }
+
+    :root.dark .glass-sheen::before,
+    :root.dark .card::before {
+        background: linear-gradient(
+            150deg,
+            rgb(255 214 246 / 0.3),
+            rgb(255 214 246 / 0) 45%,
+            rgb(255 214 246 / 0) 65%,
+            rgb(255 214 246 / 0.12)
+        );
+    }
+
+    .card {
+        @apply p-5 sm:p-6;
+        background: var(--surface-glass);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 rgb(255 255 255 / 0.35);
+        backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+        border-radius: var(--radius-glass);
+        position: relative;
+    }
+
+    /* --- typography helpers --- */
+    .page-title {
+        @apply font-display text-2xl sm:text-3xl font-bold;
+        color: var(--text-strong);
+    }
+
+    .muted {
+        color: var(--text-muted);
+    }
+
+    .stat-value {
+        @apply font-display text-3xl sm:text-4xl font-bold tabular-nums;
+        color: var(--text-strong);
+    }
+
+    /* --- buttons --- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full
+               px-5 py-2.5 text-sm font-bold cursor-pointer select-none;
+        transition: transform 0.35s var(--ease-spring),
+            box-shadow 0.25s ease, background-color 0.25s ease,
+            color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .btn:active {
+        transform: scale(0.95);
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        box-shadow: 0 10px 24px -12px var(--accent);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 16px 30px -12px var(--accent);
+    }
+
+    .btn-ghost {
+        background: var(--surface-glass);
+        color: var(--accent);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .btn-ghost:hover {
+        background: var(--surface-glass-strong);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: #d6336c;
+        color: #fff;
+        box-shadow: 0 10px 24px -12px #d6336c;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-icon {
+        @apply inline-flex items-center justify-center rounded-full;
+        width: 2.75rem;
+        height: 2.75rem;
+        color: var(--accent);
+        background: var(--surface-glass);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.35s var(--ease-spring), background-color 0.25s ease;
+        cursor: pointer;
+    }
+
+    .btn-icon:hover {
+        background: var(--surface-glass-strong);
+        transform: translateY(-2px) rotate(-4deg);
+    }
+
+    .btn-icon:active {
+        transform: scale(0.92);
+    }
+
+    /* --- form controls --- */
+    .field {
+        @apply w-full rounded-2xl px-4 py-3 text-base;
+        background: var(--surface-glass-strong);
+        border: 1px solid var(--glass-border);
+        color: var(--text-strong);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease,
+            background-color 0.2s ease;
+    }
+
+    .field::placeholder {
+        color: var(--text-muted);
+    }
+
+    .field:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .field-label {
+        @apply block text-sm font-bold mb-1.5;
+        color: var(--text-body);
+    }
+
+    /* checkbox styled as a pill switch */
+    .switch {
+        @apply relative inline-flex shrink-0 cursor-pointer appearance-none
+               rounded-full;
+        width: 3.25rem;
+        height: 1.85rem;
+        background: var(--surface-sunken);
+        border: 1px solid var(--glass-border);
+        transition: background-color 0.3s ease;
+    }
+
+    .switch::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0.2rem;
+        width: 1.35rem;
+        height: 1.35rem;
+        translate: 0 -50%;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+        transition: translate 0.4s var(--ease-spring), left 0.4s var(--ease-spring);
+    }
+
+    .switch:checked {
+        background: var(--accent);
+        border-color: transparent;
+    }
+
+    .switch:checked::after {
+        left: calc(100% - 1.55rem);
+    }
+
+    /* --- segmented control (ranges, tabs) --- */
+    .segment {
+        @apply inline-flex items-center gap-1 rounded-full p-1;
+        background: var(--surface-glass-soft);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .segment-item {
+        @apply rounded-full px-2.5 py-1.5 text-[0.8rem] font-bold whitespace-nowrap
+               cursor-pointer sm:px-3.5 sm:text-sm;
+        color: var(--text-muted);
+        transition: color 0.2s ease, background-color 0.25s ease,
+            transform 0.35s var(--ease-spring);
+    }
+
+    .segment-item:hover {
+        color: var(--text-strong);
+    }
+
+    .segment-item[aria-selected="true"],
+    .segment input:checked + .segment-item {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        box-shadow: 0 8px 18px -10px var(--accent);
+    }
+
+    /* --- navigation --- */
+    .nav-link {
+        @apply inline-flex items-center gap-2 rounded-full px-3.5 py-2
+               text-sm font-bold;
+        color: var(--text-body);
+        transition: background-color 0.25s ease, color 0.2s ease,
+            transform 0.35s var(--ease-spring);
+    }
+
+    .nav-link:hover {
+        background: var(--surface-glass);
+        color: var(--text-strong);
+        transform: translateY(-1px);
+    }
+
+    .nav-link[aria-current="page"] {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        box-shadow: 0 10px 22px -14px var(--accent);
+    }
+
+    .tab-link {
+        @apply flex flex-1 flex-col items-center justify-center gap-0.5
+               rounded-2xl py-1.5 text-[0.68rem] font-bold;
+        color: var(--text-muted);
+        transition: color 0.2s ease, background-color 0.25s ease;
+    }
+
+    .tab-link[aria-current="page"] {
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .tab-link[aria-current="page"] .icon {
+        transform: translateY(-1px) scale(1.08);
+    }
+
+    .tab-link .icon {
+        transition: transform 0.4s var(--ease-spring);
+    }
+
+    /* --- icons --- */
+    .icon {
+        @apply inline-block shrink-0;
+        width: 1.5rem;
+        height: 1.5rem;
+        fill: currentColor;
+    }
+
+    /* --- status badges --- */
+    .badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold;
+    }
+
+    .badge-ok {
+        background: var(--status-ok-bg);
+        color: var(--status-ok);
+    }
+
+    .badge-warn {
+        background: var(--status-warn-bg);
+        color: var(--status-warn);
+    }
+
+    .badge-alert {
+        background: var(--status-alert-bg);
+        color: var(--status-alert);
+    }
+
+    /* --- alerts --- */
+    .alert {
+        @apply rounded-2xl px-4 py-3 text-sm font-semibold;
+        border: 1px solid var(--glass-border);
+    }
+
+    .alert-error {
+        background: rgb(214 51 108 / 0.12);
+        color: #b02a5b;
+        border-color: rgb(214 51 108 / 0.3);
+    }
+
+    :root.dark .alert-error {
+        color: #ffa8c5;
+    }
+
+    .alert-success {
+        background: rgb(14 154 122 / 0.12);
+        color: #0b7a60;
+        border-color: rgb(14 154 122 / 0.3);
+    }
+
+    :root.dark .alert-success {
+        color: #7be6c8;
+    }
+
+    /* --- data table / list hybrid --- */
+    .data-table {
+        @apply w-full text-sm;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wide;
+        color: var(--text-muted);
+    }
+
+    .data-table td {
+        @apply px-4 py-3;
+        color: var(--text-body);
+        border-top: 1px solid var(--glass-ring);
+    }
+
+    .data-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background: var(--surface-glass-soft);
+    }
+
+    .list-row {
+        @apply flex items-center justify-between gap-3 px-4 py-3;
+        border-top: 1px solid var(--glass-ring);
+        transition: background-color 0.2s ease;
+    }
+
+    .list-row:first-child {
+        border-top: 0;
+    }
+
+    .list-row:hover {
+        background: var(--surface-glass-soft);
+    }
+
+    /* --- calendar grid --- */
+    .day-cell {
+        @apply relative flex flex-col items-center justify-start gap-0.5
+               rounded-2xl px-0.5 py-1.5 text-sm cursor-pointer;
+        aspect-ratio: 1;
+        background: var(--surface-glass-soft);
+        border: 1px solid transparent;
+        color: var(--text-body);
+        transition: transform 0.35s var(--ease-spring),
+            background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    @media (min-width: 640px) {
+        .day-cell {
+            aspect-ratio: 4 / 3;
+            @apply px-1 py-2;
+        }
+    }
+
+    .day-cell:hover {
+        background: var(--surface-glass-strong);
+        transform: translateY(-2px);
+    }
+
+    .day-cell:active {
+        transform: scale(0.95);
+    }
+
+    .day-cell.is-outside {
+        opacity: 0.38;
+    }
+
+    .day-cell.is-today {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .day-cell.is-today .day-num {
+        color: var(--accent);
+        font-weight: 800;
+    }
+
+    .day-cell.is-selected {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .day-cell.is-period {
+        background: rgb(214 51 108 / 0.14);
+    }
+
+    .day-cell.is-predicted {
+        background: rgb(52 201 163 / 0.14);
+        border-style: dashed;
+        border-color: rgb(52 201 163 / 0.5);
+    }
+
+    .day-cell.is-predicted.is-overdue {
+        background: rgb(245 181 68 / 0.16);
+        border-color: rgb(245 181 68 / 0.55);
+    }
+
+    .day-num {
+        @apply font-display text-[0.8rem] font-bold leading-none sm:text-sm;
+        color: var(--text-strong);
+    }
+
+    /* values only on wide screens, dots on narrow ones */
+    .day-values {
+        @apply hidden flex-col items-center leading-tight sm:flex;
+        font-size: 0.68rem;
+    }
+
+    .day-weight {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .day-calories {
+        color: var(--text-body);
+    }
+
+    .day-dots {
+        @apply flex flex-wrap items-center justify-center gap-0.5 sm:hidden;
+        min-height: 0.4rem;
+    }
+
+    .dot {
+        @apply inline-block rounded-full;
+        width: 0.34rem;
+        height: 0.34rem;
+    }
+
+    .dot-weight {
+        background: var(--accent);
+    }
+
+    .dot-calories {
+        background: var(--color-sky-400);
+    }
+
+    .dot-period {
+        background: #d6336c;
+    }
+
+    .dot-predicted {
+        background: var(--color-mint-400);
+    }
+
+    .dot-predicted.dot-overdue {
+        background: var(--color-sun-400);
+    }
+}
+
+/* ---------------------------------------------------------- animations */
+@layer utilities {
+    @keyframes rise-in {
+        from {
+            opacity: 0;
+            translate: 0 18px;
+            scale: 0.97;
+        }
+        to {
+            opacity: 1;
+            translate: 0 0;
+            scale: 1;
+        }
+    }
+
+    @keyframes float-blob {
+        0%, 100% {
+            translate: 0 0;
+            scale: 1;
+        }
+        50% {
+            translate: 3% -4%;
+            scale: 1.08;
+        }
+    }
+
+    @keyframes pop {
+        0% { scale: 1; }
+        45% { scale: 1.18 0.86; }
+        100% { scale: 1; }
+    }
+
+    @keyframes wiggle {
+        0%, 100% { rotate: 0deg; }
+        25% { rotate: -7deg; }
+        75% { rotate: 7deg; }
+    }
+
+    .animate-rise {
+        animation: rise-in 0.55s var(--ease-spring) both;
+    }
+
+    .animate-pop {
+        animation: pop 0.5s var(--ease-spring);
+    }
+
+    .animate-wiggle {
+        animation: wiggle 0.6s ease-in-out;
+    }
+
+    .hover-lift {
+        transition: transform 0.4s var(--ease-spring), box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-4px) scale(1.015);
+        box-shadow: 0 26px 50px -26px rgb(76 12 62 / 0.55);
+    }
+
+    .hover-lift:active {
+        transform: translateY(-1px) scale(0.99);
+    }
+
+    .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+}
+
+/* background blobs behind the glass */
+.aurora {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.aurora span {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(70px);
+    animation: float-blob 18s ease-in-out infinite;
+}
+
+.aurora span:nth-child(1) {
+    width: 45vmax;
+    height: 45vmax;
+    top: -12vmax;
+    left: -10vmax;
+    background: var(--blob-1);
+}
+
+.aurora span:nth-child(2) {
+    width: 38vmax;
+    height: 38vmax;
+    bottom: -14vmax;
+    right: -8vmax;
+    background: var(--blob-2);
+    animation-delay: -6s;
+}
+
+.aurora span:nth-child(3) {
+    width: 30vmax;
+    height: 30vmax;
+    top: 35%;
+    right: 20%;
+    background: var(--blob-3);
+    animation-delay: -11s;
+}
+
+/* view transitions between pages */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root) {
+    animation: 0.18s ease both fade-out;
+}
+
+::view-transition-new(root) {
+    animation: 0.32s var(--ease-spring) both fade-in;
+}
+
+@keyframes fade-out {
+    to { opacity: 0; }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; translate: 0 8px; }
+    to { opacity: 1; translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    @view-transition {
+        navigation: none;
+    }
+}

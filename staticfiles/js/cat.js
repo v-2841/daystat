@@ -1,18 +1,26 @@
-let catButton = document.getElementById("cat-button");
-let catLoading = document.getElementById("cat-loading");
-let catImage = document.getElementById("cat-image");
+// Random cat from cataas.com, with a spring reveal.
+(() => {
+    const button = document.getElementById("cat-button");
+    const loading = document.getElementById("cat-loading");
+    const image = document.getElementById("cat-image");
+    if (!button || !loading || !image) return;
 
-catButton.addEventListener("click", () => {
-    catButton.classList.add("d-none");
-    catLoading.classList.remove("d-none");
-    fetch("https://cataas.com/cat")
-        .then((response) => response.blob())
-        .then((blob) => {
-            catImage.src = URL.createObjectURL(blob);
-        })
-        .then(() => {
-            catLoading.classList.add("d-none");
-            catImage.classList.remove("d-none");
-        })
-        .catch((error) => console.error("Ошибка загрузки:", error));
-});
+    button.addEventListener("click", () => {
+        button.classList.add("hidden");
+        loading.classList.remove("hidden");
+        fetch("https://cataas.com/cat")
+            .then((response) => response.blob())
+            .then((blob) => {
+                image.src = URL.createObjectURL(blob);
+                loading.classList.add("hidden");
+                image.classList.remove("hidden");
+                image.classList.add("animate-rise");
+                button.classList.remove("hidden");
+                button.querySelector("span").textContent = "Ещё котика!";
+            })
+            .catch(() => {
+                loading.textContent = "Котик не пришёл, попробуйте ещё раз";
+                button.classList.remove("hidden");
+            });
+    });
+})();

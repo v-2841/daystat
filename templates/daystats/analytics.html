@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static ui %}
+{% block title %}
+    Аналитика
+{% endblock title %}
+{% block content %}
+    <h1 class="page-title mb-4">Аналитика</h1>
+    <nav class="mb-4 -mx-3 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
+        <div class="segment w-max">
+            <a class="segment-item"
+               href="?tab=trends"
+               {% if tab == 'trends' %}aria-selected="true"{% endif %}>Вес и калории</a>
+            <a class="segment-item"
+               href="?tab=cycle"
+               {% if tab == 'cycle' %}aria-selected="true"{% endif %}>Цикл</a>
+            <a class="segment-item"
+               href="?tab=weeks"
+               {% if tab == 'weeks' %}aria-selected="true"{% endif %}>Недели</a>
+        </div>
+    </nav>
+    {% if tab == 'trends' %}
+        <section class="card">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+                <div class="segment" role="group" aria-label="Показатель">
+                    <input class="sr-only"
+                           type="radio"
+                           name="type"
+                           id="weightButton"
+                           checked
+                           autocomplete="off">
+                    <label class="segment-item" for="weightButton">Вес</label>
+                    <input class="sr-only"
+                           type="radio"
+                           name="type"
+                           id="caloriesButton"
+                           autocomplete="off">
+                    <label class="segment-item" for="caloriesButton">Калории</label>
+                </div>
+                <div class="ms-auto -mx-1 max-w-full overflow-x-auto px-1 pb-1">
+                    <div class="segment w-max" role="group" aria-label="Период">
+                        <input class="sr-only"
+                               type="radio"
+                               name="range"
+                               id="weekButton"
+                               autocomplete="off">
+                        <label class="segment-item" for="weekButton">Неделя</label>
+                        <input class="sr-only"
+                               type="radio"
+                               name="range"
+                               id="monthButton"
+                               checked
+                               autocomplete="off">
+                        <label class="segment-item" for="monthButton">Месяц</label>
+                        <input class="sr-only"
+                               type="radio"
+                               name="range"
+                               id="6monthsButton"
+                               autocomplete="off">
+                        <label class="segment-item" for="6monthsButton">6 мес.</label>
+                        <input class="sr-only"
+                               type="radio"
+                               name="range"
+                               id="yearButton"
+                               autocomplete="off">
+                        <label class="segment-item" for="yearButton">Год</label>
+                        <input class="sr-only"
+                               type="radio"
+                               name="range"
+                               id="5yearsButton"
+                               autocomplete="off">
+                        <label class="segment-item" for="5yearsButton">5 лет</label>
+                    </div>
+                </div>
+            </div>
+            <div class="h-[320px] sm:h-[420px]">
+                <canvas id="myChart"></canvas>
+            </div>
+        </section>
+    {% elif tab == 'cycle' %}
+        <section class="card">
+            <h2 class="mb-1 text-lg">Длина цикла и вес</h2>
+            <p class="muted mb-3 text-sm">Точка цикла стоит на дате следующего начала — тогда его длина становится известна.</p>
+            <div class="h-[320px] sm:h-[420px]">
+                <canvas id="cycleWeightChart"></canvas>
+            </div>
+        </section>
+    {% else %}
+        <section class="space-y-5">
+            {% for year, weeks in data.items %}
+                <div class="card p-0 sm:p-0">
+                    <h2 class="px-5 pt-5 text-lg">{{ year }}</h2>
+                    <table class="data-table mt-2 hidden sm:table">
+                        <thead>
+                            <tr>
+                                <th>Неделя</th>
+                                <th class="text-end">Средние калории</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week, item in weeks.items %}
+                                <tr>
+                                    <td>{{ week }}</td>
+                                    <td class="text-end font-bold tabular-nums">{{ item.avg_calories|floatformat:0 }} ккал</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="mt-2 sm:hidden">
+                        {% for week, item in weeks.items %}
+                            <div class="list-row">
+                                <span class="muted text-sm">Неделя {{ week }}</span>
+                                <span class="font-display font-bold tabular-nums"
+                                      style="color: var(--text-strong)">{{ item.avg_calories|floatformat:0 }} ккал</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="h-5"></div>
+                </div>
+            {% empty %}
+                {% include "includes/empty.html" with text="Пока нет записей с калориями" %}
+            {% endfor %}
+        </section>
+    {% endif %}
+{% endblock content %}
+{% block extrabody %}
+    {% if tab == 'trends' or tab == 'cycle' %}
+        <script src="{% static 'js/vendor/chart.umd.min.js' %}"></script>
+        <script src="{% static 'js/vendor/luxon.min.js' %}"></script>
+        <script src="{% static 'js/vendor/chartjs-adapter-luxon.umd.min.js' %}"></script>
+        <script src="{% static 'js/charts.js' %}"></script>
+        {% if tab == 'trends' %}
+            <script src="{% static 'js/chart-trends.js' %}"></script>
+        {% else %}
+            <script src="{% static 'js/chart-cycle.js' %}"></script>
+        {% endif %}
+    {% endif %}
+{% endblock extrabody %}

@@ -1,28 +1,134 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static ui %}
 {% block title %}
     Календарь
 {% endblock title %}
-{% block extrahead %}
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.20/index.global.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-{% endblock extrahead %}
 {% block content %}
-    <div class="card mt-2 mb-4 text-center">
-        <div class="card-header">Прогноз начала следующего цикла</div>
-        <div class="card-body">
-            <div class="row g-0">
-                <div class="col-6 border-end">
-                    <div class="small text-muted">Дата</div>
-                    <div class="fw-semibold">{{ next_period_date }}</div>
-                </div>
-                <div class="col-6">
-                    <div class="small text-muted">Статус</div>
-                    <div class="fw-semibold">{{ next_period_status }}</div>
-                </div>
-            </div>
+    <h1 class="page-title mb-4">Календарь</h1>
+    <section class="card mb-4 flex items-stretch gap-2 p-3 sm:gap-4 sm:p-5">
+        <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+            <span class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl sm:flex"
+                  style="background: var(--accent-soft);
+                         color: var(--accent)">{% icon "drop" "icon w-6 h-6" %}</span>
+            <span class="min-w-0">
+                <span class="muted block text-[0.7rem] sm:text-xs">Следующий цикл</span>
+                <span class="font-display block truncate text-sm font-bold lowercase sm:text-base"
+                      style="color: var(--text-strong)">
+                    {% if next_period.date %}
+                        {{ next_period.date|date:"j M" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+                {% if next_period.date %}<span class="muted block text-[0.7rem]">{{ next_period.status }}</span>{% endif %}
+            </span>
         </div>
+        <div class="w-px shrink-0" style="background: var(--glass-ring)"></div>
+        <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+            <span class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl sm:flex"
+                  style="background: var(--accent-soft);
+                         color: var(--accent)">{% icon "scales" "icon w-6 h-6" %}</span>
+            <span class="min-w-0">
+                <span class="muted block text-[0.7rem] sm:text-xs">Средний вес</span>
+                <span class="font-display block truncate text-sm font-bold tabular-nums sm:text-base"
+                      style="color: var(--text-strong)">
+                    {% if avg_weight %}
+                        {{ avg_weight|floatformat:1 }} кг
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </span>
+        </div>
+        <div class="w-px shrink-0" style="background: var(--glass-ring)"></div>
+        <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+            <span class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl sm:flex"
+                  style="background: var(--accent-soft);
+                         color: var(--accent)">{% icon "fork-knife" "icon w-6 h-6" %}</span>
+            <span class="min-w-0">
+                <span class="muted block text-[0.7rem] sm:text-xs">Калории</span>
+                <span class="font-display block truncate text-sm font-bold tabular-nums sm:text-base"
+                      style="color: var(--text-strong)">
+                    {% if avg_calories %}
+                        {{ avg_calories|floatformat:0 }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </span>
+        </div>
+    </section>
+    <section class="card" id="calendar" data-current-month="{{ current_month }}">
+        <header class="mb-3 flex items-center justify-between gap-2">
+            <a class="btn-icon"
+               href="?month={{ prev_month }}"
+               aria-label="Предыдущий месяц"
+               data-nav="prev">{% icon "caret-left" "icon w-6 h-6" %}</a>
+            <div class="text-center">
+                <h2 class="font-display text-lg font-bold sm:text-xl">{{ month_title }}</h2>
+                {% if not is_current_month %}
+                    <a class="text-xs font-bold"
+                       style="color: var(--accent)"
+                       href="{% url 'daystats:calendar' %}">к текущему месяцу</a>
+                {% endif %}
+            </div>
+            <a class="btn-icon"
+               href="?month={{ next_month }}"
+               aria-label="Следующий месяц"
+               data-nav="next">{% icon "caret-right" "icon w-6 h-6" %}</a>
+        </header>
+        <div class="grid grid-cols-7 gap-1 pb-1 text-center">
+            {% for name in weekday_names %}<div class="muted text-[0.7rem] font-bold uppercase">{{ name }}</div>{% endfor %}
+        </div>
+        <div class="grid grid-cols-7 gap-1 sm:gap-1.5">
+            {% for week in weeks %}
+                {% for day in week %}
+                    <button type="button" class="day-cell{% if not day.in_month %} is-outside{% endif %}{% if day.is_today %} is-today{% endif %}{% if day.period_start %} is-period{% endif %}{% if day.predicted %} is-predicted{% if day.predicted_overdue %} is-overdue{% endif %}{% endif %}" data-date="{{ day.date|date:'Y-m-d' }}" data-display="{{ day.display }}" data-weight="{{ day.weight|default_if_none:'' }}" data-calories="{{ day.calories|default_if_none:'' }}" data-period="{% if day.period_start %}1{% endif %}" data-predicted="{% if day.predicted %}{% if day.predicted_overdue %}overdue{% else %}upcoming{% endif %}{% endif %}" data-future="{% if day.is_future %}1{% endif %}" aria-label="{{ day.display }}">
+                        <span class="day-num">{{ day.day }}</span>
+                        <span class="day-values">
+                            {% if day.weight %}<span class="day-weight tabular-nums">{{ day.weight }}</span>{% endif %}
+                            {% if day.calories %}<span class="day-calories tabular-nums">{{ day.calories }}</span>{% endif %}
+                        </span>
+                        <span class="day-dots" aria-hidden="true">
+                            {% if day.weight %}<i class="dot dot-weight"></i>{% endif %}
+                            {% if day.calories %}<i class="dot dot-calories"></i>{% endif %}
+                            {% if day.period_start %}<i class="dot dot-period"></i>{% endif %}
+                            {% if day.predicted %}
+                                <i class="dot dot-predicted{% if day.predicted_overdue %} dot-overdue{% endif %}"></i>
+                            {% endif %}
+                        </span>
+                    </button>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="muted mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs">
+            <span class="flex items-center gap-1.5"><i class="dot dot-weight"></i>вес</span>
+            <span class="flex items-center gap-1.5"><i class="dot dot-calories"></i>калории</span>
+            <span class="flex items-center gap-1.5"><i class="dot dot-period"></i>начало цикла</span>
+            <span class="flex items-center gap-1.5"><i class="dot dot-predicted"></i>прогноз</span>
+            <span class="flex items-center gap-1.5"><i class="dot dot-predicted dot-overdue"></i>задержка</span>
+        </div>
+    </section>
+    <div class="glass glass-solid glass-sheen fixed inset-x-3 bottom-24 z-30 hidden p-4 lg:inset-x-auto lg:bottom-6 lg:end-6 lg:w-80"
+         id="day-sheet"
+         role="dialog"
+         aria-live="polite">
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h3 class="font-display text-base font-bold" id="sheet-title"></h3>
+                <p class="muted mt-0.5 text-sm" id="sheet-body"></p>
+            </div>
+            <button type="button"
+                    class="btn-icon h-9 w-9 shrink-0"
+                    id="sheet-close"
+                    aria-label="Закрыть">{% icon "x" "icon w-5 h-5" %}</button>
+        </div>
+        <a class="btn btn-primary mt-3 w-full" id="sheet-link" href="#">
+            <span>Открыть день</span>
+            {% icon "arrow-right" "icon w-5 h-5" %}
+        </a>
     </div>
-    <script src="{% static 'js/calendar.js' %}"></script>
-    <div id="calendar"></div>
 {% endblock content %}
+{% block extrabody %}
+    <script src="{% static 'js/calendar.js' %}"></script>
+{% endblock extrabody %}

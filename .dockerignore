@@ -90,3 +90,6 @@ venv/
 
 static/
 db.sqlite3
+
+# Tailwind CLI binary downloaded at build time
+.django_tailwind_cli/

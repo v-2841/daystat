@@ -163,3 +163,7 @@ cython_debug/
 
 static/
 .vscode/
+
+# Tailwind CLI binary and generated stylesheet
+.django_tailwind_cli/
+staticfiles/css/tailwind.css
