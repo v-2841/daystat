@@ -8,11 +8,16 @@ class DaystatForm(ModelForm):
         model = Daystat
         fields = ['calories', 'weight', 'period_start']
 
+    # short units: the fields are already labelled next to the input
+    PLACEHOLDERS = {
+        'calories': 'ккал',
+        'weight': 'кг',
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs[
-                'placeholder'] = self.fields[field].label
+        for field, placeholder in self.PLACEHOLDERS.items():
+            self.fields[field].widget.attrs['placeholder'] = placeholder
 
 
 class ExpenseForm(ModelForm):

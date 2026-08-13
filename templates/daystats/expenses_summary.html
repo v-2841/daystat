@@ -33,10 +33,8 @@
                     {% for key, item in groups.items %}
                         <div class="list-row">
                             <span class="min-w-0">
-                                <span class="font-display block font-bold capitalize"
-                                      style="color: var(--text-strong)">
-                                    {% if unit_label == 'Неделя' %}Неделя{% endif %}{{ key }}
-                                </span>
+                                <span class="font-display block font-bold"
+                                      style="color: var(--text-strong)">{{ item.label }}</span>
                                 <span class="muted block truncate text-xs">{{ item.notes|default:"—" }}</span>
                             </span>
                             <span class="font-display shrink-0 font-bold tabular-nums"

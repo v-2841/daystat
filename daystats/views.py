@@ -488,7 +488,7 @@ def expense_delete(request, pk):
     return redirect('daystats:expenses')
 
 
-def group_expenses(expenses, key_func):
+def group_expenses(expenses, key_func, label_func):
     grouped = defaultdict(lambda: defaultdict(list))
     for expense in expenses:
         local_time = timezone.localtime(expense.created_at)
@@ -504,6 +504,7 @@ def group_expenses(expenses, key_func):
                 'sum_value': sum(item.value for item in items),
                 'notes': notes,
                 'count': len(items),
+                'label': label_func(key),
             }
     return data
 
@@ -515,6 +516,7 @@ def expenses_weeks(request):
         'data': group_expenses(
             expenses,
             lambda dt: (dt.year, int(dt.strftime('%W'))),
+            lambda week: f'Неделя {week}',
         ),
         'tab': 'weeks',
         'unit_label': 'Неделя',
@@ -529,6 +531,7 @@ def expenses_months(request):
         'data': group_expenses(
             expenses,
             lambda dt: (dt.year, MONTH_NAMES[dt.month]),
+            lambda month: month.capitalize(),
         ),
         'tab': 'months',
         'unit_label': 'Месяц',
