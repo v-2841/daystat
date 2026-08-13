@@ -1,9 +1,9 @@
 // Weight / calories chart with range switching.
 (() => {
     const canvas = document.getElementById("myChart");
-    if (!canvas || !window.DayStatCharts) return;
+    if (!canvas || !window.DaystatCharts) return;
 
-    const { palette, fade, baseOptions, register } = window.DayStatCharts;
+    const { palette, fade, baseOptions, register } = window.DaystatCharts;
     const typeButtons = document.querySelectorAll('input[name="type"]');
     const rangeButtons = document.querySelectorAll('input[name="range"]');
 

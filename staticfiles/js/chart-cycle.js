@@ -1,9 +1,9 @@
 // Cycle length vs smoothed weight over the whole history.
 (() => {
     const canvas = document.getElementById("cycleWeightChart");
-    if (!canvas || !window.DayStatCharts) return;
+    if (!canvas || !window.DaystatCharts) return;
 
-    const { palette, fade, baseOptions, register } = window.DayStatCharts;
+    const { palette, fade, baseOptions, register } = window.DaystatCharts;
     const colors = palette();
     const options = baseOptions();
 

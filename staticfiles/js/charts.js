@@ -1,5 +1,5 @@
 // Shared Chart.js theming: reads CSS tokens, repaints on theme switch.
-window.DayStatCharts = (() => {
+window.DaystatCharts = (() => {
     const charts = [];
 
     const cssVar = (name) =>

@@ -1,6 +1,6 @@
-# DayStat
+# Daystat
 
-DayStat is a small personal Django app for tracking daily health and expense
+Daystat is a small personal Django app for tracking daily health and expense
 data. It keeps daily records for weight, calories, and cycle starts, shows
 calendar and chart summaries, and stores simple expense notes.
 
