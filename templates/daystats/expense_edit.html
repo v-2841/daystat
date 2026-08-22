@@ -6,14 +6,7 @@
 {% block content %}
     <div class="mx-auto max-w-md">
         <h1 class="page-title mb-4">Расход</h1>
-        {% if form.errors %}
-            <div class="alert alert-error mb-3">
-                {% for field in form %}
-                    {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
-            </div>
-        {% endif %}
+        {% include "includes/form_errors.html" %}
         <form method="post" class="card space-y-3">
             {% csrf_token %}
             <p class="muted text-sm">{{ expense.created_at|date:"j E Y, H:i" }}</p>

@@ -6,17 +6,10 @@
 {% block content %}
     <h1 class="page-title mb-4">Расходы</h1>
     {% include "includes/expenses_tabs.html" %}
-    <div class="grid gap-4 lg:grid-cols-[22rem_1fr] lg:items-start">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[22rem_1fr] lg:items-start">
         <section class="card">
             <h2 class="mb-3 text-lg">Новый расход</h2>
-            {% if form.errors %}
-                <div class="alert alert-error mb-3">
-                    {% for field in form %}
-                        {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
-                </div>
-            {% endif %}
+            {% include "includes/form_errors.html" %}
             <form method="post" class="space-y-3">
                 {% csrf_token %}
                 <div>
@@ -36,8 +29,7 @@
         <section class="card p-0 sm:p-0">
             <header class="flex items-baseline justify-between gap-3 px-5 pt-5">
                 <h2 class="text-lg">На этой неделе</h2>
-                <span class="font-display text-xl font-bold tabular-nums"
-                      style="color: var(--accent)">{{ week_total|money }}</span>
+                <span class="font-display text-accent text-xl font-bold tabular-nums">{{ week_total|money }}</span>
             </header>
             {% if week_expenses %}
                 <table class="data-table mt-3 hidden sm:table">
@@ -55,10 +47,17 @@
                                 id="expense_{{ expense.id }}"
                                 data-url="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}">
                                 <td class="whitespace-nowrap">{{ expense.created_at|date:"j E, H:i" }}</td>
-                                <td class="text-end font-bold tabular-nums"
-                                    style="color: var(--text-strong)">{{ expense.value|money }}</td>
-                                <td class="muted">{{ expense.note|default:"—" }}</td>
-                                <td class="w-8 text-end" style="color: var(--accent)">{% icon "pencil-simple" "icon w-4 h-4" %}</td>
+                                <td class="text-strong text-end font-bold tabular-nums">{{ expense.value|money }}</td>
+                                <td class="muted" title="{{ expense.note }}">
+                                    <span class="block max-w-xs truncate">{{ expense.note|default:"—" }}</span>
+                                </td>
+                                <td class="w-8 text-end">
+                                    <a class="text-accent inline-flex rounded-lg p-1"
+                                       href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}"
+                                       aria-label="Изменить расход {{ expense.value }} за {{ expense.created_at|date:'j E, H:i' }}">
+                                        {% icon "pencil-simple" "icon w-4 h-4" %}
+                                    </a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -69,11 +68,10 @@
                            id="expense_m_{{ expense.id }}"
                            href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_m_{{ expense.id }}">
                             <span class="min-w-0">
-                                <span class="font-display block font-bold"
-                                      style="color: var(--text-strong)">{{ expense.value|money }}</span>
+                                <span class="font-display text-strong block font-bold">{{ expense.value|money }}</span>
                                 <span class="muted block truncate text-xs">{{ expense.created_at|date:"j E, H:i" }}</span>
                             </span>
-                            <span class="muted min-w-0 truncate text-end text-sm">{{ expense.note|default:"" }}</span>
+                            <span class="muted min-w-0 max-w-[45%] truncate text-end text-sm">{{ expense.note|default:"" }}</span>
                         </a>
                     {% endfor %}
                 </div>

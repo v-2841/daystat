@@ -28,12 +28,17 @@
         <link rel="mask-icon"
               href="{% static 'img/safari-pinned-tab.svg' %}"
               color="#991a7d">
+        {# app.js repaints these to match the chosen theme #}
         <meta name="theme-color"
               content="#fdd8f6"
-              media="(prefers-color-scheme: light)">
+              media="(prefers-color-scheme: light)"
+              data-light="#fdd8f6"
+              data-dark="#2c0724">
         <meta name="theme-color"
               content="#2c0724"
-              media="(prefers-color-scheme: dark)">
+              media="(prefers-color-scheme: dark)"
+              data-light="#fdd8f6"
+              data-dark="#2c0724">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="Daystat">
         <title>

@@ -18,12 +18,9 @@
     <section class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" data-stagger>
         <a class="card hover-lift col-span-2 flex items-center gap-4 lg:col-span-3"
            href="{% url 'daystats:day' %}">
-            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                  style="background: var(--accent-soft);
-                         color: var(--accent)">{% icon "notebook" "icon w-7 h-7" %}</span>
+            <span class="icon-plate h-12 w-12">{% icon "notebook" "icon w-7 h-7" %}</span>
             <span class="min-w-0 flex-1">
-                <span class="font-display block text-lg font-bold"
-                      style="color: var(--text-strong)">Дневник дня</span>
+                <span class="font-display text-strong block text-lg font-bold">Дневник дня</span>
                 <span class="muted block text-sm">
                     {% if daystat.weight or daystat.calories %}
                         {% if daystat.weight %}{{ daystat.weight }} кг{% endif %}
@@ -35,14 +32,12 @@
                     {% endif %}
                 </span>
             </span>
-            <span class="shrink-0" style="color: var(--accent)">{% icon "arrow-right" "icon w-6 h-6" %}</span>
+            <span class="text-accent shrink-0">{% icon "arrow-right" "icon w-6 h-6" %}</span>
         </a>
         <a class="card hover-lift flex flex-col gap-3"
            href="{% url 'daystats:calendar' %}">
             <span class="flex items-center justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
-                      style="background: var(--accent-soft);
-                             color: var(--accent)">{% icon "calendar-dots" "icon w-6 h-6" %}</span>
+                <span class="icon-plate h-11 w-11">{% icon "calendar-dots" "icon w-6 h-6" %}</span>
                 {% if next_period.date %}
                     <span class="badge {% if next_period.tone == 'overdue' %}badge-warn{% elif next_period.tone == 'today' %}badge-alert{% else %}badge-ok{% endif %}">
                         {{ next_period.status }}
@@ -50,8 +45,7 @@
                 {% endif %}
             </span>
             <span>
-                <span class="font-display block text-lg font-bold"
-                      style="color: var(--text-strong)">Календарь</span>
+                <span class="font-display text-strong block text-lg font-bold">Календарь</span>
                 <span class="muted block text-sm">
                     {% if period_day %}
                         День цикла {{ period_day }}
@@ -63,26 +57,20 @@
         </a>
         <a class="card hover-lift flex flex-col gap-3"
            href="{% url 'daystats:analytics' %}">
-            <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
-                  style="background: var(--accent-soft);
-                         color: var(--accent)">{% icon "chart-line-up" "icon w-6 h-6" %}</span>
+            <span class="icon-plate h-11 w-11">{% icon "chart-line-up" "icon w-6 h-6" %}</span>
             <span>
-                <span class="font-display block text-lg font-bold"
-                      style="color: var(--text-strong)">Аналитика</span>
+                <span class="font-display text-strong block text-lg font-bold">Аналитика</span>
                 <span class="muted block text-sm">Вес, калории и цикл</span>
             </span>
         </a>
         <a class="card hover-lift col-span-2 flex flex-col gap-3 lg:col-span-1"
            href="{% url 'daystats:expenses' %}">
             <span class="flex items-center justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-2xl"
-                      style="background: var(--accent-soft);
-                             color: var(--accent)">{% icon "wallet" "icon w-6 h-6" %}</span>
+                <span class="icon-plate h-11 w-11">{% icon "wallet" "icon w-6 h-6" %}</span>
                 <span class="stat-value text-2xl sm:text-2xl">{{ week_expenses|money }}</span>
             </span>
             <span>
-                <span class="font-display block text-lg font-bold"
-                      style="color: var(--text-strong)">Расходы</span>
+                <span class="font-display text-strong block text-lg font-bold">Расходы</span>
                 <span class="muted block text-sm">С начала недели</span>
             </span>
         </a>

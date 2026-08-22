@@ -9,13 +9,13 @@
         <div class="segment w-max">
             <a class="segment-item"
                href="?tab=trends"
-               {% if tab == 'trends' %}aria-selected="true"{% endif %}>Вес и калории</a>
+               {% if tab == 'trends' %}aria-current="page"{% endif %}>Вес и калории</a>
             <a class="segment-item"
                href="?tab=cycle"
-               {% if tab == 'cycle' %}aria-selected="true"{% endif %}>Цикл</a>
+               {% if tab == 'cycle' %}aria-current="page"{% endif %}>Цикл</a>
             <a class="segment-item"
                href="?tab=weeks"
-               {% if tab == 'weeks' %}aria-selected="true"{% endif %}>Недели</a>
+               {% if tab == 'weeks' %}aria-current="page"{% endif %}>Недели</a>
         </div>
     </nav>
     {% if tab == 'trends' %}
@@ -72,6 +72,9 @@
                     </div>
                 </div>
             </div>
+            <p class="alert alert-error mb-2 empty:hidden"
+               id="chart-status"
+               role="status"></p>
             <div class="h-[320px] sm:h-[420px]">
                 <canvas id="myChart"></canvas>
             </div>
@@ -80,6 +83,9 @@
         <section class="card">
             <h2 class="mb-1 text-lg">Длина цикла и вес</h2>
             <p class="muted mb-3 text-sm">Точка цикла стоит на дате следующего начала — тогда его длина становится известна.</p>
+            <p class="alert alert-error mb-2 empty:hidden"
+               id="chart-status"
+               role="status"></p>
             <div class="h-[320px] sm:h-[420px]">
                 <canvas id="cycleWeightChart"></canvas>
             </div>
@@ -109,8 +115,7 @@
                         {% for week, item in weeks.items %}
                             <div class="list-row">
                                 <span class="muted text-sm">Неделя {{ week }}</span>
-                                <span class="font-display font-bold tabular-nums"
-                                      style="color: var(--text-strong)">{{ item.avg_calories|floatformat:0 }} ккал</span>
+                                <span class="font-display text-strong font-bold tabular-nums">{{ item.avg_calories|floatformat:0 }} ккал</span>
                             </div>
                         {% endfor %}
                     </div>

@@ -2,12 +2,12 @@
     <div class="segment w-max">
         <a class="segment-item"
            href="{% url 'daystats:expenses' %}"
-           {% if tab == 'list' %}aria-selected="true"{% endif %}>Лента</a>
+           {% if tab == "list" %}aria-current="page"{% endif %}>Лента</a>
         <a class="segment-item"
            href="{% url 'daystats:expenses_weeks' %}"
-           {% if tab == 'weeks' %}aria-selected="true"{% endif %}>По неделям</a>
+           {% if tab == "weeks" %}aria-current="page"{% endif %}>По неделям</a>
         <a class="segment-item"
            href="{% url 'daystats:expenses_months' %}"
-           {% if tab == 'months' %}aria-selected="true"{% endif %}>По месяцам</a>
+           {% if tab == "months" %}aria-current="page"{% endif %}>По месяцам</a>
     </div>
 </nav>

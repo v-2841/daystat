@@ -27,14 +27,7 @@
                 <p class="muted text-sm">{{ date_display }}</p>
             </div>
         </header>
-        {% if form.errors %}
-            <div class="alert alert-error mb-4">
-                {% for field in form %}
-                    {% for error in field.errors %}<p>{{ field.label }}: {{ error|escape }}</p>{% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
-            </div>
-        {% endif %}
+        {% include "includes/form_errors.html" %}
         {% if saved %}
             <div class="alert alert-success mb-4 flex items-center gap-2"
                  id="saved-alert">
@@ -47,41 +40,30 @@
             <div class="flex items-center justify-between gap-4 py-3">
                 <label class="flex min-w-0 items-center gap-3"
                        for="{{ form.weight.id_for_label }}">
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                          style="background: var(--accent-soft);
-                                 color: var(--accent)">{% icon "scales" "icon w-6 h-6" %}</span>
+                    <span class="icon-plate h-11 w-11">{% icon "scales" "icon w-6 h-6" %}</span>
                     <span class="min-w-0">
-                        <span class="font-display block font-bold"
-                              style="color: var(--text-strong)">Вес</span>
+                        <span class="font-display text-strong block font-bold">Вес</span>
                         <span class="muted block text-xs">килограммы</span>
                     </span>
                 </label>
-                <div class="w-32 shrink-0">{{ form.weight|field_class:"field text-end tabular-nums" }}</div>
+                <div class="w-24 shrink-0 sm:w-32">{{ form.weight|field_class:"field text-end tabular-nums" }}</div>
             </div>
-            <div class="flex items-center justify-between gap-4 border-t py-3"
-                 style="border-color: var(--glass-ring)">
+            <div class="rule-soft flex items-center justify-between gap-4 border-t py-3">
                 <label class="flex min-w-0 items-center gap-3"
                        for="{{ form.calories.id_for_label }}">
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                          style="background: var(--accent-soft);
-                                 color: var(--accent)">{% icon "fork-knife" "icon w-6 h-6" %}</span>
+                    <span class="icon-plate h-11 w-11">{% icon "fork-knife" "icon w-6 h-6" %}</span>
                     <span class="min-w-0">
-                        <span class="font-display block font-bold"
-                              style="color: var(--text-strong)">Калории</span>
+                        <span class="font-display text-strong block font-bold">Калории</span>
                         <span class="muted block text-xs">ккал за день</span>
                     </span>
                 </label>
-                <div class="w-32 shrink-0">{{ form.calories|field_class:"field text-end tabular-nums" }}</div>
+                <div class="w-24 shrink-0 sm:w-32">{{ form.calories|field_class:"field text-end tabular-nums" }}</div>
             </div>
-            <div class="flex items-center justify-between gap-4 border-t py-3"
-                 style="border-color: var(--glass-ring)">
+            <div class="rule-soft flex items-center justify-between gap-4 border-t py-3">
                 <label class="flex min-w-0 items-center gap-3" for="id_period_start">
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                          style="background: var(--accent-soft);
-                                 color: var(--accent)">{% icon "drop" "icon w-6 h-6" %}</span>
+                    <span class="icon-plate h-11 w-11">{% icon "drop" "icon w-6 h-6" %}</span>
                     <span class="min-w-0">
-                        <span class="font-display block font-bold"
-                              style="color: var(--text-strong)">
+                        <span class="font-display text-strong block font-bold">
                             Цикл
                             {% if period_day %}· день {{ period_day }}{% endif %}
                         </span>
@@ -101,7 +83,7 @@
                 </button>
             </div>
         </form>
-        <nav class="mt-4 flex items-center justify-between gap-3">
+        <nav class="mt-4 flex flex-wrap items-center justify-between gap-2">
             <a class="btn btn-ghost"
                href="{% url 'daystats:daystats' date=yesterday|date:'Y-m-d' %}">
                 {% icon "caret-left" "icon w-5 h-5" %}

@@ -8,8 +8,7 @@
                  alt=""
                  width="36"
                  height="36">
-            <span class="font-display text-xl font-bold"
-                  style="color: var(--text-strong)">Daystat</span>
+            <span class="font-display text-strong text-xl font-bold">Daystat</span>
         </a>
         {% if request.user.is_authenticated %}
             <div class="ms-auto hidden items-center gap-1 lg:flex">
@@ -42,8 +41,7 @@
                     <div class="glass glass-strong glass-sheen absolute end-0 top-full z-50 mt-2 hidden w-56 origin-top-right p-2"
                          data-menu-panel>
                         <div class="px-3 pb-2 pt-1">
-                            <div class="font-display text-sm font-bold"
-                                 style="color: var(--text-strong)">
+                            <div class="font-display text-strong text-sm font-bold">
                                 {{ request.user.first_name|default:request.user.username }}
                             </div>
                             <div class="muted text-xs">{{ request.user.email|default:"" }}</div>

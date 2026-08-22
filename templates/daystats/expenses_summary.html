@@ -21,10 +21,11 @@
                     <tbody>
                         {% for key, item in groups.items %}
                             <tr>
-                                <td class="whitespace-nowrap capitalize">{{ key }}</td>
-                                <td class="text-end font-bold tabular-nums"
-                                    style="color: var(--text-strong)">{{ item.sum_value|money }}</td>
-                                <td class="muted max-w-md truncate" title="{{ item.notes }}">{{ item.notes|default:"—" }}</td>
+                                <td class="whitespace-nowrap">{{ item.label }}</td>
+                                <td class="text-strong text-end font-bold tabular-nums">{{ item.sum_value|money }}</td>
+                                <td class="muted" title="{{ item.notes }}">
+                                    <span class="block max-w-md truncate">{{ item.notes|default:"—" }}</span>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -33,12 +34,10 @@
                     {% for key, item in groups.items %}
                         <div class="list-row">
                             <span class="min-w-0">
-                                <span class="font-display block font-bold"
-                                      style="color: var(--text-strong)">{{ item.label }}</span>
+                                <span class="font-display text-strong block font-bold">{{ item.label }}</span>
                                 <span class="muted block truncate text-xs">{{ item.notes|default:"—" }}</span>
                             </span>
-                            <span class="font-display shrink-0 font-bold tabular-nums"
-                                  style="color: var(--accent)">{{ item.sum_value|money }}</span>
+                            <span class="font-display text-accent shrink-0 font-bold tabular-nums">{{ item.sum_value|money }}</span>
                         </div>
                     {% endfor %}
                 </div>
