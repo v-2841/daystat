@@ -4,10 +4,11 @@ from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Sum
-from django.db.models.functions import ExtractYear
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from daystats.forms import DaystatForm, ExpenseForm
@@ -35,20 +36,6 @@ MONTH_NAMES = {
     11: 'ноябрь',
     12: 'декабрь',
 }
-MONTH_NAMES_GENITIVE = {
-    1: 'января',
-    2: 'февраля',
-    3: 'марта',
-    4: 'апреля',
-    5: 'мая',
-    6: 'июня',
-    7: 'июля',
-    8: 'августа',
-    9: 'сентября',
-    10: 'октября',
-    11: 'ноября',
-    12: 'декабря',
-}
 WEEKDAY_NAMES = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
 PREDICTION_HORIZON = datetime.timedelta(days=365)
 SMOOTHING_WINDOWS = {
@@ -59,7 +46,7 @@ SMOOTHING_WINDOWS = {
 
 
 def format_date(date):
-    return f'{date.day} {MONTH_NAMES_GENITIVE[date.month]} {date.year}'
+    return date_format(date, 'j E Y')
 
 
 def current_week_start():
@@ -129,12 +116,15 @@ def build_cycle_length_points(daystats):
     return points
 
 
-def predict_next_period_date(user):
+def predict_next_period_date(user, predicted_dates=None):
     today = timezone.localdate()
-    predicted_dates = predict_period_dates(user, include_past=True)
+    if predicted_dates is None:
+        predicted_dates = predict_period_dates(user, include_past=True)
     overdue_dates = [date for date in predicted_dates if date < today]
     if overdue_dates:
-        return overdue_dates[-1]
+        # the first missed date, so the delay keeps growing instead of
+        # resetting on every skipped prediction
+        return overdue_dates[0]
 
     for predicted_date in predicted_dates:
         if predicted_date >= today:
@@ -185,8 +175,8 @@ def get_period_day(user, date):
     return None
 
 
-def get_next_period_summary(user):
-    next_period_date = predict_next_period_date(user)
+def get_next_period_summary(user, predicted_dates=None):
+    next_period_date = predict_next_period_date(user, predicted_dates)
     if not next_period_date:
         return {'date': None, 'status': 'нет данных', 'tone': 'muted'}
 
@@ -227,7 +217,14 @@ def home(request):
 @login_required
 def day(request, date=None):
     if date:
-        date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+        try:
+            date = datetime.date.fromisoformat(date)
+        except ValueError:
+            raise Http404('Некорректная дата')
+        # the neighbour days are computed below, so the edges of the
+        # calendar have to stay reachable
+        if not datetime.date.min < date < datetime.date.max:
+            raise Http404('Дата вне допустимого диапазона')
         if date == timezone.localdate():
             return redirect('daystats:day')
         elif date > timezone.localdate():
@@ -238,22 +235,16 @@ def day(request, date=None):
             return render(request, 'daystats/future_day.html', context)
     else:
         date = timezone.localdate()
-    daystat, _ = Daystat.objects.get_or_create(
-        user=request.user,
-        date=date,
-    )
+    daystat = Daystat.objects.filter(user=request.user, date=date).first()
 
     if request.method == 'POST':
+        # the row is created only when there is something to save
+        if daystat is None:
+            daystat = Daystat(user=request.user, date=date)
         form = DaystatForm(request.POST, instance=daystat)
         if form.is_valid():
             form.save()
-            if request.resolver_match.view_name == 'daystats:daystats':
-                return redirect(
-                    f'{request.path}?saved=1',
-                )
-            return redirect(f"{request.path}?saved=1")
-        else:
-            daystat.refresh_from_db()
+            return redirect(f'{request.path}?saved=1')
     else:
         form = DaystatForm(instance=daystat)
 
@@ -276,12 +267,26 @@ def day(request, date=None):
 @login_required
 def calendar(request):
     today_date = timezone.localdate()
-    try:
-        year, month = (int(part)
-                       for part in request.GET.get('month', '').split('-'))
-        datetime.date(year, month, 1)
-    except (ValueError, TypeError):
-        year, month = today_date.year, today_date.month
+    year, month = today_date.year, today_date.month
+    requested = request.GET.get('month', '')
+    if requested:
+        try:
+            parts = [int(part) for part in requested.split('-')]
+            if len(parts) != 2:
+                raise ValueError('ожидается ГГГГ-ММ')
+            # a week of padding on both sides has to stay a valid date
+            probe_year, probe_month = parts
+            first = datetime.date(probe_year, probe_month, 1)
+            last = datetime.date(
+                probe_year, probe_month,
+                calendar_module.monthrange(probe_year, probe_month)[1],
+            )
+            first - datetime.timedelta(days=7)
+            last + datetime.timedelta(days=7)
+        except (ValueError, TypeError, OverflowError):
+            pass
+        else:
+            year, month = probe_year, probe_month
 
     first_day = datetime.date(year, month, 1)
     last_day = datetime.date(
@@ -300,8 +305,9 @@ def calendar(request):
             date__lte=grid_end,
         )
     }
+    predicted_dates = predict_period_dates(request.user, include_past=True)
     predicted = {
-        date for date in predict_period_dates(request.user, include_past=True)
+        date for date in predicted_dates
         if grid_start <= date <= grid_end
     }
 
@@ -350,7 +356,9 @@ def calendar(request):
         'current_month': f'{year:04d}-{month:02d}',
         'is_current_month': (year, month) == (today_date.year,
                                               today_date.month),
-        'next_period': get_next_period_summary(request.user),
+        'next_period': get_next_period_summary(
+            request.user, predicted_dates=predicted_dates,
+        ),
         'period_day': get_period_day(request.user, today_date),
         'avg_weight': month_stats['avg_weight'],
         'avg_calories': month_stats['avg_calories'],
@@ -366,31 +374,34 @@ def analytics(request):
 
     context = {'tab': tab}
     if tab == 'weeks':
-        weekly_avg_calories = (
+        daystats = (
             Daystat.objects
-            .filter(
-                user=request.user,
-                calories__gt=0,
-            )
-            .annotate(
-                year=ExtractYear('date'),
-            )
-            .values('year', 'week')
-            .annotate(avg_calories=Avg('calories'))
-            .order_by('-year', '-week')
+            .filter(user=request.user, calories__gt=0)
+            .values_list('date', 'calories')
         )
 
+        # grouped by ISO year and week, so a week spanning the new year
+        # stays one row instead of splitting into «week 52» and «week 0»
+        buckets = defaultdict(list)
+        for date, calories in daystats:
+            iso = date.isocalendar()
+            buckets[(iso.year, iso.week)].append(calories)
+
         data = defaultdict(dict)
-        for entry in weekly_avg_calories:
-            data[entry['year']][entry['week']] = {
-                'avg_calories': entry['avg_calories'],
+        for (year, week) in sorted(buckets, reverse=True):
+            values = buckets[(year, week)]
+            data[year][week] = {
+                'avg_calories': sum(values) / len(values),
             }
-        context['data'] = {year: weeks for year, weeks in data.items()}
+        context['data'] = dict(data)
     return render(request, 'daystats/analytics.html', context)
 
 
 @login_required
 def chart_api(request, type, range):
+    if range not in DATE_RANGE or type not in ('weight', 'calories'):
+        raise Http404('Неизвестный график')
+
     dataset = {}
     dataset['data'] = []
     today = timezone.localdate()
@@ -418,10 +429,11 @@ def cycle_weight_chart_api(request):
         ).order_by('date')
     )
 
-    if daystats:
+    weighed = [daystat for daystat in daystats if daystat.weight is not None]
+    if weighed:
         range_name = get_range_name_for_dates(
-            daystats[0].date,
-            daystats[-1].date,
+            weighed[0].date,
+            weighed[-1].date,
         )
     else:
         range_name = 'week'
@@ -468,13 +480,14 @@ def expense_edit(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.user != expense.user:
         return redirect('daystats:expenses')
-    next_page = request.GET.get('next', 'daystats:expenses')
-    if not url_has_allowed_host_and_scheme(
+    # only a real path is accepted: a view name here would blow up in reverse()
+    next_page = request.GET.get('next', '')
+    if not next_page.startswith('/') or not url_has_allowed_host_and_scheme(
         url=next_page,
         allowed_hosts={request.get_host()},
         require_https=request.is_secure(),
     ):
-        next_page = 'daystats:expenses'
+        next_page = reverse('daystats:expenses')
     form = ExpenseForm(request.POST or None, instance=expense)
     if request.method == 'POST' and form.is_valid():
         form.save()
@@ -521,7 +534,7 @@ def expenses_weeks(request):
     context = {
         'data': group_expenses(
             expenses,
-            lambda dt: (dt.year, int(dt.strftime('%W'))),
+            lambda dt: dt.isocalendar()[:2],
             lambda week: f'Неделя {week}',
         ),
         'tab': 'weeks',
@@ -536,8 +549,8 @@ def expenses_months(request):
     context = {
         'data': group_expenses(
             expenses,
-            lambda dt: (dt.year, MONTH_NAMES[dt.month]),
-            lambda month: month.capitalize(),
+            lambda dt: (dt.year, dt.month),
+            lambda month: MONTH_NAMES[month].capitalize(),
         ),
         'tab': 'months',
         'unit_label': 'Месяц',

@@ -1,26 +1,15 @@
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import redirect, render
 
 from users.forms import ProfileForm
 
 
-User = get_user_model()
-
-
 @login_required
 def profile_edit(request):
-    user = get_object_or_404(User, username=request.user.username)
-    form = ProfileForm(
-        request.POST or None,
-        instance=user,
-    )
-    context = {
-        'form': form,
-    }
-    if not form.is_valid():
-        return render(request, 'users/profile_edit.html', context)
-    form.save()
-    messages.success(request, 'Данные профиля успешно изменены')
-    return render(request, 'users/profile_edit.html', context)
+    form = ProfileForm(request.POST or None, instance=request.user)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Данные профиля успешно изменены')
+        return redirect('users:profile_edit')
+    return render(request, 'users/profile_edit.html', {'form': form})

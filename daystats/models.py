@@ -61,7 +61,7 @@ class Daystat(models.Model):
         return f'{self.user} | {self.date.strftime("%d %B %Y г.")}'
 
     def save(self, *args, **kwargs):
-        self.week = int(self.date.strftime('%W'))
+        self.week = self.date.isocalendar().week
         super().save(*args, **kwargs)
 
 
@@ -98,6 +98,6 @@ class Expense(models.Model):
     @property
     def week(self):
         local_time = timezone.localtime(self.created_at)
-        return int(local_time.strftime('%W'))
+        return local_time.isocalendar().week
 
     week.fget.short_description = 'Неделя'
