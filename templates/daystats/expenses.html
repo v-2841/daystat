@@ -35,11 +35,11 @@
         </section>
         <section class="card p-0 sm:p-0">
             <header class="flex items-baseline justify-between gap-3 px-5 pt-5">
-                <h2 class="text-lg">За 7 дней</h2>
+                <h2 class="text-lg">На этой неделе</h2>
                 <span class="font-display text-xl font-bold tabular-nums"
                       style="color: var(--accent)">{{ week_total|money }}</span>
             </header>
-            {% if last_week_expenses %}
+            {% if week_expenses %}
                 <table class="data-table mt-3 hidden sm:table">
                     <thead>
                         <tr>
@@ -50,7 +50,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for expense in last_week_expenses %}
+                        {% for expense in week_expenses %}
                             <tr class="expense-row cursor-pointer"
                                 id="expense_{{ expense.id }}"
                                 data-url="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}">
@@ -64,7 +64,7 @@
                     </tbody>
                 </table>
                 <div class="mt-3 sm:hidden">
-                    {% for expense in last_week_expenses %}
+                    {% for expense in week_expenses %}
                         <a class="list-row"
                            id="expense_m_{{ expense.id }}"
                            href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_m_{{ expense.id }}">
@@ -85,7 +85,7 @@
                          alt=""
                          width="80"
                          height="80">
-                    <p class="muted text-sm">За последнюю неделю расходов нет</p>
+                    <p class="muted text-sm">На этой неделе расходов пока нет</p>
                 </div>
             {% endif %}
         </section>

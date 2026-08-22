@@ -62,6 +62,15 @@ def format_date(date):
     return f'{date.day} {MONTH_NAMES_GENITIVE[date.month]} {date.year}'
 
 
+def current_week_start():
+    """Midnight of the Monday of the current week, in the local timezone."""
+    today = timezone.localdate()
+    monday = today - datetime.timedelta(days=today.weekday())
+    return timezone.make_aware(
+        datetime.datetime.combine(monday, datetime.time.min),
+    )
+
+
 def moving_average(points, window_size):
     if window_size <= 1 or not points:
         return points
@@ -199,12 +208,9 @@ def home(request):
     user = request.user
     today_date = timezone.localdate()
     daystat = Daystat.objects.filter(user=user, date=today_date).first()
-    week_start = today_date - datetime.timedelta(days=today_date.weekday())
     week_expenses = Expense.objects.filter(
         user=user,
-        created_at__gte=timezone.make_aware(
-            datetime.datetime.combine(week_start, datetime.time.min),
-        ),
+        created_at__gte=current_week_start(),
     ).aggregate(total=Sum('value'))['total'] or 0
 
     context = {
@@ -435,9 +441,9 @@ def cycle_weight_chart_api(request):
 
 @login_required
 def expenses(request):
-    last_week_expenses = Expense.objects.filter(
+    week_expenses = Expense.objects.filter(
         user=request.user,
-        created_at__gte=timezone.now() - DATE_RANGE['week'],
+        created_at__gte=current_week_start(),
     ).order_by('-created_at')
     form = ExpenseForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -446,9 +452,9 @@ def expenses(request):
         expense.save()
         return redirect(f"{request.path}?saved=1")
     context = {
-        'last_week_expenses': last_week_expenses,
+        'week_expenses': week_expenses,
         'week_total': sum(
-            expense.value for expense in last_week_expenses
+            expense.value for expense in week_expenses
         ),
         'form': form,
         'tab': 'list',
