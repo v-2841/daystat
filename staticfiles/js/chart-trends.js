@@ -3,7 +3,8 @@
     const canvas = document.getElementById("myChart");
     if (!canvas || !window.DaystatCharts) return;
 
-    const { palette, fade, baseOptions, register } = window.DaystatCharts;
+    const { palette, fade, baseOptions, register, applyTheme } =
+        window.DaystatCharts;
     const typeButtons = document.querySelectorAll('input[name="type"]');
     const rangeButtons = document.querySelectorAll('input[name="range"]');
 
@@ -42,27 +43,38 @@
     register(chart, (instance, colors) => {
         instance.data.datasets[0].borderColor = colors.accent;
         instance.data.datasets[0].pointHoverBackgroundColor = colors.accent;
-        instance.options.scales.x.grid.color = colors.grid;
-        instance.options.scales.y.grid.color = colors.grid;
-        instance.options.scales.x.ticks.color = colors.muted;
-        instance.options.scales.y.ticks.color = colors.muted;
-        instance.options.plugins.tooltip.backgroundColor = colors.tooltipBg;
-        instance.options.plugins.tooltip.titleColor = colors.tooltipText;
-        instance.options.plugins.tooltip.bodyColor = colors.text;
+        applyTheme(instance, colors, ["x", "y"]);
     });
+
+    const status = document.getElementById("chart-status");
+    let pending = null;
 
     const load = () => {
         const type = selected(typeButtons);
         const range = selected(rangeButtons);
         if (!type || !range) return;
-        fetch(`/chart/${type}/${range}/`)
-            .then((response) => response.json())
+        // a slower earlier request must not overwrite the current range
+        pending?.abort();
+        pending = new AbortController();
+        if (status) status.textContent = "";
+        fetch(`/chart/${type}/${range}/`, { signal: pending.signal })
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
             .then((data) => {
                 canvas.dataset.unit = type === "weight" ? "кг" : "ккал";
                 chart.data.datasets[0].data = data.data;
                 chart.update();
             })
-            .catch((error) => console.error("Не удалось загрузить данные:", error));
+            .catch((error) => {
+                if (error.name === "AbortError") return;
+                console.error("Не удалось загрузить данные:", error);
+                if (status) {
+                    status.textContent =
+                        "Не удалось загрузить данные. Попробуйте обновить страницу.";
+                }
+            });
     };
 
     [...typeButtons, ...rangeButtons].forEach((button) =>

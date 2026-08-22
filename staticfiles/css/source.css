@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
+/* the theme is a class on <html>, not the OS setting */
+@custom-variant dark (&:where(:root.dark, :root.dark *));
+
 @source "../../templates";
-@source "../js";
+@source "../js/*.js";
 
 /* ---------------------------------------------------------------- fonts */
 @font-face {
@@ -42,26 +45,10 @@
     --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Comfortaa', 'Nunito', ui-sans-serif, system-ui, sans-serif;
 
-    /* brand ramp: pastel surface -> deep berry accent */
-    --color-berry-50: #fff5fc;
-    --color-berry-100: #ffe7f8;
-    --color-berry-200: #fdc3f5;
-    --color-berry-300: #f49ce4;
-    --color-berry-400: #de77cc;
-    --color-berry-500: #c256ad;
-    --color-berry-600: #a5348d;
-    --color-berry-700: #991a7d;
-    --color-berry-800: #70125c;
-    --color-berry-900: #4c0c3e;
-    --color-berry-950: #2c0724;
 
-    /* companion hues for data & states */
+    /* companion hues used by calendar markers */
     --color-mint-400: #34c9a3;
-    --color-mint-600: #0e9a7a;
     --color-sun-400: #f5b544;
-    --color-sun-600: #c98707;
-    --color-sky-400: #58a6f5;
-    --color-sky-600: #2b6fc4;
 
     --radius-glass: 1.5rem;
 
@@ -92,6 +79,7 @@
         --glass-border: rgb(255 255 255 / 0.65);
         --glass-ring: rgb(153 26 125 / 0.1);
         --glass-shadow: 0 18px 45px -22px rgb(76 12 62 / 0.45);
+        --glass-shadow-lift: 0 26px 50px -26px rgb(76 12 62 / 0.55);
         --glass-blur: 18px;
 
         --text-strong: #4c0c3e;
@@ -102,6 +90,10 @@
         --accent: #991a7d;
         --accent-contrast: #ffffff;
         --accent-soft: rgb(153 26 125 / 0.12);
+
+        /* read by charts.js through getComputedStyle, so it must live in
+           :root and not depend on @theme tree-shaking */
+        --chart-line-2: #2b6fc4;
 
         --status-ok: #0a6e57;
         --status-ok-bg: rgb(52 201 163 / 0.2);
@@ -133,6 +125,7 @@
         --glass-border: rgb(255 214 246 / 0.14);
         --glass-ring: rgb(255 214 246 / 0.08);
         --glass-shadow: 0 20px 50px -24px rgb(0 0 0 / 0.75);
+        --glass-shadow-lift: 0 28px 54px -26px rgb(0 0 0 / 0.9);
 
         --text-strong: #fde5f8;
         --text-body: #e6c2dd;
@@ -140,6 +133,8 @@
         --accent: #f9a8e0;
         --accent-contrast: #2c0724;
         --accent-soft: rgb(249 168 224 / 0.16);
+
+        --chart-line-2: #7cc0ff;
 
         --status-ok: #7be6c8;
         --status-ok-bg: rgb(52 201 163 / 0.16);
@@ -207,7 +202,8 @@
 /* ----------------------------------------------------------- components */
 @layer components {
     /* --- liquid glass surfaces --- */
-    .glass {
+    .glass,
+    .card {
         background: var(--surface-glass);
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-shadow), inset 0 1px 0 rgb(255 255 255 / 0.35);
@@ -219,10 +215,6 @@
 
     .glass-strong {
         background: var(--surface-glass-strong);
-    }
-
-    .glass-soft {
-        background: var(--surface-glass-soft);
     }
 
     /* opaque enough to sit above content without it bleeding through */
@@ -264,15 +256,9 @@
         );
     }
 
+    /* .card is the glass surface plus padding */
     .card {
         @apply p-5 sm:p-6;
-        background: var(--surface-glass);
-        border: 1px solid var(--glass-border);
-        box-shadow: var(--glass-shadow), inset 0 1px 0 rgb(255 255 255 / 0.35);
-        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-        backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-        border-radius: var(--radius-glass);
-        position: relative;
     }
 
     /* --- typography helpers --- */
@@ -299,7 +285,10 @@
             color 0.25s ease, border-color 0.25s ease;
     }
 
-    .btn:active {
+    /* declared after the variants below would still lose to :hover, so the
+       pressed state is pinned with a stronger selector */
+    .btn:active,
+    .btn:hover:active {
         transform: scale(0.95);
     }
 
@@ -439,7 +428,13 @@
         color: var(--text-strong);
     }
 
-    .segment-item[aria-selected="true"],
+    /* the real radio is sr-only, so mirror its focus ring onto the label */
+    .segment input:focus-visible + .segment-item {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .segment-item[aria-current="page"],
     .segment input:checked + .segment-item {
         background: var(--accent);
         color: var(--accent-contrast);
@@ -493,6 +488,26 @@
         width: 1.5rem;
         height: 1.5rem;
         fill: currentColor;
+    }
+
+    /* --- text and surface helpers, so templates stay free of inline style --- */
+    .text-strong {
+        color: var(--text-strong);
+    }
+
+    .text-accent {
+        color: var(--accent);
+    }
+
+    .rule-soft {
+        border-color: var(--glass-ring);
+    }
+
+    /* the rounded icon plate used next to labels and in tiles */
+    .icon-plate {
+        @apply flex shrink-0 items-center justify-center rounded-2xl;
+        background: var(--accent-soft);
+        color: var(--accent);
     }
 
     /* --- status badges --- */
@@ -594,7 +609,7 @@
             background-color 0.25s ease, border-color 0.25s ease;
     }
 
-    @media (min-width: 640px) {
+    @media (min-width: 40rem) {
         .day-cell {
             aspect-ratio: 4 / 3;
             @apply justify-start gap-0.5 rounded-2xl px-1 py-2;
@@ -675,14 +690,6 @@
         height: 0.34rem;
     }
 
-    .dot-weight {
-        background: var(--accent);
-    }
-
-    .dot-calories {
-        background: var(--color-sky-400);
-    }
-
     .dot-period {
         background: #d6336c;
     }
@@ -752,15 +759,16 @@
 
     .hover-lift:hover {
         transform: translateY(-4px) scale(1.015);
-        box-shadow: 0 26px 50px -26px rgb(76 12 62 / 0.55);
+        box-shadow: var(--glass-shadow-lift);
     }
 
     .hover-lift:active {
         transform: translateY(-1px) scale(0.99);
     }
 
+    /* adds to the element's own padding instead of overwriting it */
     .safe-bottom {
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        margin-bottom: env(safe-area-inset-bottom, 0px);
     }
 }
 

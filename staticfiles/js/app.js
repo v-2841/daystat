@@ -2,6 +2,17 @@
 (() => {
     const root = document.documentElement;
 
+    // the browser chrome should follow the chosen theme, not the OS one
+    const paintChrome = (dark) => {
+        document.querySelectorAll('meta[name="theme-color"]').forEach((tag) => {
+            tag.media = "";
+            tag.content = dark
+                ? tag.dataset.dark || "#2c0724"
+                : tag.dataset.light || "#fdd8f6";
+        });
+    };
+    paintChrome(root.classList.contains("dark"));
+
     // ---------------------------------------------------------- theme
     const toggle = document.getElementById("theme-toggle");
     if (toggle) {
@@ -9,6 +20,7 @@
             const dark = !root.classList.contains("dark");
             root.classList.toggle("dark", dark);
             localStorage.setItem("daystat-theme", dark ? "dark" : "light");
+            paintChrome(dark);
             toggle.classList.remove("animate-pop");
             void toggle.offsetWidth;
             toggle.classList.add("animate-pop");
@@ -23,6 +35,7 @@
         .addEventListener("change", (event) => {
             if (localStorage.getItem("daystat-theme")) return;
             root.classList.toggle("dark", event.matches);
+            paintChrome(event.matches);
             document.dispatchEvent(
                 new CustomEvent("daystat:theme", {
                     detail: { dark: event.matches },
@@ -36,7 +49,12 @@
         const panel = menu.querySelector("[data-menu-panel]");
         if (!button || !panel) return;
 
-        const close = () => {
+        const close = ({ restoreFocus = false } = {}) => {
+            if (panel.classList.contains("hidden")) return;
+            // keyboard users must not be dropped back to the page start
+            if (restoreFocus || panel.contains(document.activeElement)) {
+                button.focus();
+            }
             panel.classList.add("hidden");
             button.setAttribute("aria-expanded", "false");
         };
@@ -53,7 +71,7 @@
         });
 
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") close();
+            if (event.key === "Escape") close({ restoreFocus: true });
         });
     });
 

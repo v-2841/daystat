@@ -1,6 +1,17 @@
 // Confetti burst + mascot wiggle after a successful save.
 (() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // the flag has to go even when the celebration is skipped, otherwise a
+    // refresh replays the "saved" notice
+    const dropSavedFlag = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("saved");
+        window.history.replaceState({}, "", url);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        dropSavedFlag();
+        return;
+    }
 
     const cat = document.getElementById("day-cat");
     if (cat) {
@@ -53,8 +64,5 @@
 
     setTimeout(() => layer.remove(), 2200);
 
-    // drop the ?saved=1 flag so a refresh doesn't replay the celebration
-    const url = new URL(window.location.href);
-    url.searchParams.delete("saved");
-    window.history.replaceState({}, "", url);
+    dropSavedFlag();
 })();

@@ -14,8 +14,7 @@ window.DaystatCharts = (() => {
             grid: dark ? "rgba(255,214,246,.10)" : "rgba(153,26,125,.10)",
             tooltipBg: dark ? "rgba(44,7,36,.94)" : "rgba(255,255,255,.94)",
             tooltipText: cssVar("--text-strong"),
-            sky: cssVar("--color-sky-400"),
-            mint: cssVar("--color-mint-400"),
+            line2: cssVar("--chart-line-2"),
         };
     };
 
@@ -87,6 +86,24 @@ window.DaystatCharts = (() => {
         };
     };
 
+    // every chart repaints the same axes, grid and tooltip on a theme switch
+    const applyTheme = (chart, colors, scales) => {
+        for (const name of scales) {
+            const scale = chart.options.scales[name];
+            if (!scale) continue;
+            if (scale.grid) scale.grid.color = colors.grid;
+            if (scale.ticks) scale.ticks.color = colors.muted;
+        }
+        const tooltip = chart.options.plugins.tooltip;
+        tooltip.backgroundColor = colors.tooltipBg;
+        tooltip.titleColor = colors.tooltipText;
+        tooltip.bodyColor = colors.text;
+        tooltip.borderColor = colors.grid;
+        if (chart.options.plugins.legend.labels) {
+            chart.options.plugins.legend.labels.color = colors.text;
+        }
+    };
+
     const register = (chart, restyle) => {
         charts.push({ chart, restyle });
     };
@@ -98,5 +115,5 @@ window.DaystatCharts = (() => {
         });
     });
 
-    return { palette, fade, baseOptions, register };
+    return { palette, fade, baseOptions, register, applyTheme };
 })();

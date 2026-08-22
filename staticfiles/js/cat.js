@@ -7,10 +7,18 @@
 
     button.addEventListener("click", () => {
         button.classList.add("hidden");
+        loading.textContent = "Ищем котика...";
         loading.classList.remove("hidden");
         fetch("https://cataas.com/cat")
-            .then((response) => response.blob())
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.blob();
+            })
             .then((blob) => {
+                // the previous cat would otherwise stay in memory
+                if (image.src.startsWith("blob:")) {
+                    URL.revokeObjectURL(image.src);
+                }
                 image.src = URL.createObjectURL(blob);
                 loading.classList.add("hidden");
                 image.classList.remove("hidden");

@@ -3,7 +3,8 @@
     const canvas = document.getElementById("cycleWeightChart");
     if (!canvas || !window.DaystatCharts) return;
 
-    const { palette, fade, baseOptions, register } = window.DaystatCharts;
+    const { palette, fade, baseOptions, register, applyTheme } =
+        window.DaystatCharts;
     const colors = palette();
     const options = baseOptions();
 
@@ -43,11 +44,11 @@
                 {
                     label: "Средний вес, кг",
                     data: [],
-                    borderColor: colors.sky,
+                    borderColor: colors.line2,
                     borderWidth: 2.5,
                     tension: 0.45,
                     fill: true,
-                    backgroundColor: (ctx) => fade(ctx, palette().sky),
+                    backgroundColor: (ctx) => fade(ctx, palette().line2),
                     pointRadius: 0,
                     pointHoverRadius: 5,
                     yAxisID: "weight",
@@ -60,24 +61,26 @@
     register(chart, (instance, next) => {
         instance.data.datasets[0].borderColor = next.accent;
         instance.data.datasets[0].backgroundColor = next.accent;
-        instance.data.datasets[1].borderColor = next.sky;
-        instance.options.plugins.legend.labels.color = next.text;
-        instance.options.scales.x.grid.color = next.grid;
-        instance.options.scales.cycleLength.grid.color = next.grid;
-        instance.options.scales.x.ticks.color = next.muted;
-        instance.options.scales.cycleLength.ticks.color = next.muted;
-        instance.options.scales.weight.ticks.color = next.muted;
-        instance.options.plugins.tooltip.backgroundColor = next.tooltipBg;
-        instance.options.plugins.tooltip.titleColor = next.tooltipText;
-        instance.options.plugins.tooltip.bodyColor = next.text;
+        instance.data.datasets[1].borderColor = next.line2;
+        applyTheme(instance, next, ["x", "cycleLength", "weight"]);
     });
 
     fetch("/cycle_weight_chart/api/")
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
         .then((data) => {
             chart.data.datasets[0].data = data.datasets[0].data;
             chart.data.datasets[1].data = data.datasets[1].data;
             chart.update();
         })
-        .catch((error) => console.error("Не удалось загрузить данные:", error));
+        .catch((error) => {
+            console.error("Не удалось загрузить данные:", error);
+            const status = document.getElementById("chart-status");
+            if (status) {
+                status.textContent =
+                    "Не удалось загрузить данные. Попробуйте обновить страницу.";
+            }
+        });
 })();

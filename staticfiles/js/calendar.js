@@ -9,7 +9,13 @@
     const link = document.getElementById("sheet-link");
     const close = document.getElementById("sheet-close");
 
-    const hide = () => sheet.classList.add("hidden");
+    let opener = null;
+
+    const hide = ({ restoreFocus = false } = {}) => {
+        if (sheet.classList.contains("hidden")) return;
+        sheet.classList.add("hidden");
+        if (restoreFocus && opener) opener.focus();
+    };
 
     const describe = (cell) => {
         const parts = [];
@@ -28,11 +34,14 @@
         cell.addEventListener("click", () => {
             title.textContent = cell.dataset.display;
             body.textContent = describe(cell);
-            link.href = `/daystats/${cell.dataset.date}/`;
+            link.href = grid.dataset.dayUrl.replace("__date__",
+                cell.dataset.date);
             sheet.classList.remove("hidden");
             sheet.classList.remove("animate-rise");
             void sheet.offsetWidth;
             sheet.classList.add("animate-rise");
+            opener = cell;
+            link.focus();
 
             grid.querySelectorAll(".day-cell").forEach((other) =>
                 other.classList.toggle("is-selected", other === cell)
@@ -40,12 +49,14 @@
         });
     });
 
-    close.addEventListener("click", hide);
+    close.addEventListener("click", () => hide({ restoreFocus: true }));
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") hide();
+        if (event.key === "Escape") hide({ restoreFocus: true });
     });
 
-    // ---------------------------------------------------------- swipe
+    // ------------------------------------------------------------- swipe
+    // touch events, because a horizontal drag over the grid makes the
+    // browser fire pointercancel instead of pointerup
     const prev = grid.querySelector('[data-nav="prev"]');
     const next = grid.querySelector('[data-nav="next"]');
     let startX = 0;
@@ -53,27 +64,36 @@
     let tracking = false;
 
     grid.addEventListener(
-        "pointerdown",
+        "touchstart",
         (event) => {
-            if (event.pointerType === "mouse") return;
+            if (event.touches.length !== 1) {
+                tracking = false;
+                return;
+            }
             tracking = true;
-            startX = event.clientX;
-            startY = event.clientY;
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
         },
         { passive: true }
     );
 
     grid.addEventListener(
-        "pointerup",
+        "touchend",
         (event) => {
             if (!tracking) return;
             tracking = false;
-            const dx = event.clientX - startX;
-            const dy = event.clientY - startY;
+            const touch = event.changedTouches[0];
+            if (!touch) return;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
             if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
             const target = dx < 0 ? next : prev;
             if (target) window.location.href = target.href;
         },
         { passive: true }
     );
+
+    grid.addEventListener("touchcancel", () => {
+        tracking = false;
+    });
 })();
