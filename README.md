@@ -5,17 +5,17 @@ data. It keeps daily records for weight, calories, and cycle starts, shows
 calendar and chart summaries, and stores simple expense notes.
 
 The app is built around a daily check-in flow: each date has a single record per
-user, so the main page can be used as a compact journal for the current day and
-as an archive for previous dates. The rest of the interface turns those daily
+user, so the diary page can be used as a compact journal for the current day and
+as an archive for previous dates. A record is written only when something is
+saved, so browsing an archived date leaves no empty rows behind. The rest of the interface turns those daily
 records into calendar markers, predictions, charts, and summary tables.
 
 ## Features
 
+- Home screen with tiles for every section.
 - Daily page for weight, calories, and cycle start tracking.
 - Calendar with recorded values and predicted cycle dates.
-- Weight and calories chart with selectable ranges.
-- Cycle length and smoothed weight chart over the full available history.
-- Weekly calories summary.
+- Analytics with three tabs: weight and calories, cycle length, weekly calories.
 - Expense tracker with weekly and monthly summaries.
 - User login, logout, profile editing, and password change pages.
 - Django admin for `Daystat` and `Expense` records.
@@ -24,7 +24,7 @@ records into calendar markers, predictions, charts, and summary tables.
 
 ### Daily Tracking
 
-The home page opens the record for the current day. A user can enter weight,
+The diary page at `/day/` opens the record for the current day. A user can enter weight,
 calories, and mark whether the day is the start of a new cycle. The page also
 shows the current cycle day based on the latest previous cycle start.
 
@@ -43,23 +43,24 @@ uses the last year of recorded cycle starts, gives more weight to newer cycles,
 and projects dates for the next year. The calendar page shows the next predicted
 cycle date and whether it is upcoming, today, or overdue.
 
-### Charts
+### Analytics
 
-The weight and calories chart lets the user switch between metrics and time
-ranges: week, month, six months, year, and five years. Longer ranges smooth the
+Charts and summaries live on one page with tabs. The weight and calories tab
+lets the user switch between metrics and time ranges: week, month, six months,
+year, and five years. Longer ranges smooth the
 data with the same moving-average helper used by the chart API, so long-term
 trends are easier to read.
 
-The cycle and weight chart compares completed cycle lengths with smoothed weight
+The cycle tab compares completed cycle lengths with smoothed weight
 over the full available history. Cycle length points are plotted on the date of
 the next cycle start, because that is when the previous cycle length becomes
 known.
 
-### Calories Summary
+### Weekly Summary
 
-The calories summary groups records by year and week, then shows average
-calories for each week that has recorded calorie data. This gives a compact view
-of weekly intake trends without opening the full chart.
+The weekly tab groups records by ISO year and week, then shows average calories
+for each week that has recorded calorie data. ISO numbering keeps a week that
+spans the new year as a single row.
 
 ### Expenses
 
@@ -254,7 +255,7 @@ poetry check
 `Daystat` stores one daily record per user and date:
 
 - date
-- week number
+- ISO week number (recalculated on save)
 - calories
 - weight
 - cycle start flag
