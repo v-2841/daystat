@@ -27,6 +27,8 @@
                         {% if daystat.weight and daystat.calories %}·{% endif %}
                         {% if daystat.calories %}{{ daystat.calories }} ккал{% endif %}
                         {% if period_day %}· день цикла {{ period_day }}{% endif %}
+                    {% elif daystat.period_start and user.tracks_cycle %}
+                        Начало цикла
                     {% else %}
                         Сегодня ещё ничего не записано
                     {% endif %}
@@ -49,8 +51,10 @@
                 <span class="muted block text-sm">
                     {% if period_day %}
                         День цикла {{ period_day }}
-                    {% else %}
+                    {% elif user.tracks_cycle %}
                         Записи и прогноз цикла
+                    {% else %}
+                        Вес и калории по дням
                     {% endif %}
                 </span>
             </span>
@@ -60,7 +64,13 @@
             <span class="icon-plate h-11 w-11">{% icon "chart-line-up" "icon w-6 h-6" %}</span>
             <span>
                 <span class="font-display text-strong block text-lg font-bold">Аналитика</span>
-                <span class="muted block text-sm">Вес, калории и цикл</span>
+                <span class="muted block text-sm">
+                    {% if user.tracks_cycle %}
+                        Вес, калории и цикл
+                    {% else %}
+                        Вес и калории
+                    {% endif %}
+                </span>
             </span>
         </a>
         <a class="card hover-lift col-span-2 flex flex-col gap-3 lg:col-span-1"

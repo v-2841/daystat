@@ -10,9 +10,11 @@
             <a class="segment-item"
                href="?tab=trends"
                {% if tab == 'trends' %}aria-current="page"{% endif %}>Вес и калории</a>
-            <a class="segment-item"
-               href="?tab=cycle"
-               {% if tab == 'cycle' %}aria-current="page"{% endif %}>Цикл</a>
+            {% if user.tracks_cycle %}
+                <a class="segment-item"
+                   href="?tab=cycle"
+                   {% if tab == 'cycle' %}aria-current="page"{% endif %}>Цикл</a>
+            {% endif %}
             <a class="segment-item"
                href="?tab=weeks"
                {% if tab == 'weeks' %}aria-current="page"{% endif %}>Недели</a>

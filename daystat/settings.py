@@ -1,11 +1,9 @@
-# import locale
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 
-# locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +54,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.year.year',
                 'core.context_processors.nav.nav',
+                'core.context_processors.palette.palette',
             ],
         },
     },
@@ -68,18 +67,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': os.getenv('POSTGRES_DB', 'postgres'),
-    #     'USER': os.getenv('POSTGRES_USER', 'postgres'),
-    #     'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-    #     'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-    #     'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    #     'OPTIONS': {
-    #         'sslmode': 'require',
-    #         'pool': True,
-    #     }
-    # }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -109,7 +96,20 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-TAILWIND_CLI_SRC_CSS = os.path.join(BASE_DIR, 'staticfiles', 'css', 'source.css')
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    # collectstatic adds a content hash to every file name: a deploy changes
+    # the urls, so a browser never pairs new pages with a stale stylesheet
+    'staticfiles': {
+        'BACKEND': 'core.storage.HashedStaticFilesStorage',
+    },
+}
+
+# outside STATICFILES_DIRS: the source is no static file, and its
+# @import "tailwindcss" would fail the hashing in collectstatic
+TAILWIND_CLI_SRC_CSS = os.path.join(BASE_DIR, 'assets', 'css', 'source.css')
 TAILWIND_CLI_DIST_CSS = 'css/tailwind.css'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -118,6 +118,8 @@ CSRF_TRUSTED_ORIGINS = [i.strip() for i in os.getenv('CSRF_TRUSTED_ORIGINS', '')
 
 SESSION_SAVE_EVERY_REQUEST = True
 
+AUTH_USER_MODEL = 'users.User'
+
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'daystats:home'
 
@@ -125,4 +127,4 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

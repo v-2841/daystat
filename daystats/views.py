@@ -3,7 +3,7 @@ import datetime
 from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Count, Sum
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -11,8 +11,8 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from daystats.forms import DaystatForm, ExpenseForm
-from daystats.models import Daystat, Expense
+from daystats.forms import DaystatForm, ExpenseCategoryForm, ExpenseForm
+from daystats.models import Daystat, Expense, ExpenseCategory, alphabetical
 
 
 DATE_RANGE = {
@@ -38,6 +38,10 @@ MONTH_NAMES = {
 }
 WEEKDAY_NAMES = ('пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс')
 PREDICTION_HORIZON = datetime.timedelta(days=365)
+# a gap outside these bounds is a start marked twice or a missed one rather
+# than a real cycle, so it is left out of the prediction
+CYCLE_DAYS_MIN = 15
+CYCLE_DAYS_MAX = 60
 SMOOTHING_WINDOWS = {
     '6months': 5,
     'year': 10,
@@ -133,6 +137,8 @@ def predict_next_period_date(user, predicted_dates=None):
 
 
 def predict_period_dates(user, include_past=False):
+    if not user.tracks_cycle:
+        return []
     periods_days = list(
         Daystat.objects.filter(
             user=user,
@@ -146,6 +152,10 @@ def predict_period_dates(user, include_past=False):
         dates = periods_days
         dates_diff = [(dates[i] - dates[i + 1]).days
                       for i in range(len(dates) - 1)]
+        dates_diff = [diff for diff in dates_diff
+                      if CYCLE_DAYS_MIN <= diff <= CYCLE_DAYS_MAX]
+        if not dates_diff:
+            return []
         weights = list(range(len(dates_diff), 0, -1))
         next_period_diff = (sum(d * w for d, w in zip(dates_diff, weights))
                             / sum(weights))
@@ -165,6 +175,8 @@ def predict_period_dates(user, include_past=False):
 
 
 def get_period_day(user, date):
+    if not user.tracks_cycle:
+        return None
     last_period = Daystat.objects.filter(
         user=user,
         period_start=True,
@@ -204,7 +216,6 @@ def home(request):
     ).aggregate(total=Sum('value'))['total'] or 0
 
     context = {
-        'today_date': today_date,
         'today_display': format_date(today_date),
         'daystat': daystat,
         'period_day': get_period_day(user, today_date),
@@ -225,7 +236,8 @@ def day(request, date=None):
         # calendar have to stay reachable
         if not datetime.date.min < date < datetime.date.max:
             raise Http404('Дата вне допустимого диапазона')
-        if date == timezone.localdate():
+        # a form left open past midnight posts here to its own day
+        if date == timezone.localdate() and request.method != 'POST':
             return redirect('daystats:day')
         elif date > timezone.localdate():
             context = {
@@ -241,12 +253,16 @@ def day(request, date=None):
         # the row is created only when there is something to save
         if daystat is None:
             daystat = Daystat(user=request.user, date=date)
-        form = DaystatForm(request.POST, instance=daystat)
+        form = DaystatForm(request.POST, instance=daystat,
+                           tracks_cycle=request.user.tracks_cycle)
         if form.is_valid():
             form.save()
-            return redirect(f'{request.path}?saved=1')
+            url = (reverse('daystats:day') if date == timezone.localdate()
+                   else reverse('daystats:daystats', args=[date.isoformat()]))
+            return redirect(f'{url}?saved=1')
     else:
-        form = DaystatForm(instance=daystat)
+        form = DaystatForm(instance=daystat,
+                           tracks_cycle=request.user.tracks_cycle)
 
     is_today = date == timezone.localdate()
     context = {
@@ -256,7 +272,6 @@ def day(request, date=None):
         'yesterday': date - datetime.timedelta(days=1),
         'tomorrow': (date + datetime.timedelta(days=1)
                      if not is_today else None),
-        'daystat': daystat,
         'form': form,
         'period_day': get_period_day(request.user, date),
         'saved': request.GET.get('saved') == '1',
@@ -311,15 +326,12 @@ def calendar(request):
         if grid_start <= date <= grid_end
     }
 
+    tracks_cycle = request.user.tracks_cycle
     weeks = []
     for row in grid:
         week = []
         for date in row:
             daystat = daystats.get(date)
-            has_data = bool(
-                daystat and (daystat.weight or daystat.calories
-                             or daystat.period_start)
-            )
             week.append({
                 'date': date,
                 'day': date.day,
@@ -328,12 +340,12 @@ def calendar(request):
                 'is_future': date > today_date,
                 'weight': daystat.weight if daystat else None,
                 'calories': daystat.calories if daystat else None,
-                'period_start': bool(daystat and daystat.period_start),
+                'period_start': bool(tracks_cycle and daystat
+                                     and daystat.period_start),
                 'predicted': date in predicted and not (
                     daystat and daystat.period_start
                 ),
                 'predicted_overdue': date in predicted and date < today_date,
-                'has_data': has_data,
                 'display': format_date(date),
             })
         weeks.append(week)
@@ -353,13 +365,11 @@ def calendar(request):
         'month_title': f'{MONTH_NAMES[month].capitalize()} {year}',
         'prev_month': prev_month,
         'next_month': next_month,
-        'current_month': f'{year:04d}-{month:02d}',
         'is_current_month': (year, month) == (today_date.year,
                                               today_date.month),
         'next_period': get_next_period_summary(
             request.user, predicted_dates=predicted_dates,
         ),
-        'period_day': get_period_day(request.user, today_date),
         'avg_weight': month_stats['avg_weight'],
         'avg_calories': month_stats['avg_calories'],
     }
@@ -370,6 +380,8 @@ def calendar(request):
 def analytics(request):
     tab = request.GET.get('tab', 'trends')
     if tab not in ('trends', 'cycle', 'weeks'):
+        tab = 'trends'
+    if tab == 'cycle' and not request.user.tracks_cycle:
         tab = 'trends'
 
     context = {'tab': tab}
@@ -423,6 +435,8 @@ def chart_api(request, type, range):
 
 @login_required
 def cycle_weight_chart_api(request):
+    if not request.user.tracks_cycle:
+        raise Http404('Цикл не отслеживается')
     daystats = list(
         Daystat.objects.filter(
             user=request.user,
@@ -456,13 +470,12 @@ def expenses(request):
     week_expenses = Expense.objects.filter(
         user=request.user,
         created_at__gte=current_week_start(),
-    ).order_by('-created_at')
-    form = ExpenseForm(request.POST or None)
+    ).select_related('category').order_by('-created_at')
+    form = ExpenseForm(request.POST or None,
+                       instance=Expense(user=request.user))
     if request.method == 'POST' and form.is_valid():
-        expense = form.save(commit=False)
-        expense.user = request.user
-        expense.save()
-        return redirect(f"{request.path}?saved=1")
+        form.save()
+        return redirect(f'{request.path}?saved=1')
     context = {
         'week_expenses': week_expenses,
         'week_total': sum(
@@ -477,9 +490,7 @@ def expenses(request):
 
 @login_required
 def expense_edit(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
-    if request.user != expense.user:
-        return redirect('daystats:expenses')
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
     # only a real path is accepted: a view name here would blow up in reverse()
     next_page = request.GET.get('next', '')
     if not next_page.startswith('/') or not url_has_allowed_host_and_scheme(
@@ -501,10 +512,55 @@ def expense_edit(request, pk):
 
 @login_required
 def expense_delete(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
-    if request.user == expense.user and request.method == 'POST':
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
+    if request.method == 'POST':
         expense.delete()
     return redirect('daystats:expenses')
+
+
+@login_required
+def expense_categories(request):
+    categories = sorted(
+        ExpenseCategory.objects.filter(user=request.user).annotate(
+            count=Count('expenses'),
+            total=Sum('expenses__value'),
+        ),
+        key=lambda category: alphabetical(category.name),
+    )
+    form = ExpenseCategoryForm(request.POST or None,
+                               instance=ExpenseCategory(user=request.user))
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('daystats:expense_categories')
+    context = {
+        'categories': categories,
+        'form': form,
+        'tab': 'categories',
+    }
+    return render(request, 'daystats/expense_categories.html', context)
+
+
+@login_required
+def expense_category_edit(request, pk):
+    category = get_object_or_404(ExpenseCategory, pk=pk, user=request.user)
+    form = ExpenseCategoryForm(request.POST or None, instance=category)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('daystats:expense_categories')
+    context = {
+        'form': form,
+        'category': category,
+    }
+    return render(request, 'daystats/expense_category_edit.html', context)
+
+
+@login_required
+def expense_category_delete(request, pk):
+    category = get_object_or_404(ExpenseCategory, pk=pk, user=request.user)
+    # the expenses stay, only without the category
+    if request.method == 'POST':
+        category.delete()
+    return redirect('daystats:expense_categories')
 
 
 def group_expenses(expenses, key_func, label_func):
@@ -519,10 +575,18 @@ def group_expenses(expenses, key_func, label_func):
         data[year] = {}
         for key, items in groups.items():
             notes = ', '.join(item.note for item in items if item.note)
+            totals = defaultdict(int)
+            for item in items:
+                totals[item.category] += item.value
+            # a period recorded before the categories needs no breakdown
+            categories = []
+            if any(totals):
+                categories = sorted(totals.items(),
+                                    key=lambda pair: pair[1], reverse=True)
             data[year][key] = {
                 'sum_value': sum(item.value for item in items),
                 'notes': notes,
-                'count': len(items),
+                'categories': categories,
                 'label': label_func(key),
             }
     return data
@@ -530,7 +594,9 @@ def group_expenses(expenses, key_func, label_func):
 
 @login_required
 def expenses_weeks(request):
-    expenses = Expense.objects.filter(user=request.user)
+    expenses = Expense.objects.filter(
+        user=request.user,
+    ).select_related('category')
     context = {
         'data': group_expenses(
             expenses,
@@ -545,7 +611,9 @@ def expenses_weeks(request):
 
 @login_required
 def expenses_months(request):
-    expenses = Expense.objects.filter(user=request.user)
+    expenses = Expense.objects.filter(
+        user=request.user,
+    ).select_related('category')
     context = {
         'data': group_expenses(
             expenses,

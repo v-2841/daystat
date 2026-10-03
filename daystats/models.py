@@ -27,7 +27,10 @@ class Daystat(models.Model):
     calories = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
+        # a 0 typed by mistake would read as «no record» on some screens
+        # and pull down the averages and the chart on others
         validators=[
+            MinValueValidator(1),
             MaxValueValidator(5000),
         ],
         verbose_name='Количество калорий, ккал',
@@ -36,7 +39,7 @@ class Daystat(models.Model):
         null=True,
         blank=True,
         validators=[
-            MinValueValidator(0),
+            MinValueValidator(20),
             MaxValueValidator(250),
         ],
         verbose_name='Вес, кг',
@@ -65,9 +68,52 @@ class Daystat(models.Model):
         super().save(*args, **kwargs)
 
 
+def alphabetical(name):
+    """Sort key for a name: SQLite compares code points, which puts
+    lowercase after every capital and «Ё» before «А»."""
+    return name.casefold().replace('ё', 'е')
+
+
+class ExpenseCategory(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='expense_categories',
+        verbose_name='Пользователь',
+    )
+    name = models.CharField(
+        max_length=64,
+        verbose_name='Название',
+    )
+
+    class Meta:
+        ordering = ['name', 'user']
+        verbose_name = 'Категория расходов'
+        verbose_name_plural = 'Категории расходов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'name'],
+                name='One user can only have one category with a name',
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+
 class Expense(models.Model):
     value = models.PositiveIntegerField(
         verbose_name='Сумма',
+    )
+    # optional: the expenses recorded before categories have none,
+    # and deleting a category keeps its expenses
+    category = models.ForeignKey(
+        ExpenseCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='expenses',
+        verbose_name='Категория',
     )
     note = models.CharField(
         max_length=128,

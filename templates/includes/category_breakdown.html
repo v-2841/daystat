@@ -1,0 +1,5 @@
+{% load ui %}
+{% for category, total in categories %}
+    {{ category.name|default:"Без категории" }}&nbsp;<span class="text-strong font-bold tabular-nums whitespace-nowrap">{{ total|money }}</span>
+    {% if not forloop.last %}·{% endif %}
+{% endfor %}

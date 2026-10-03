@@ -5,18 +5,15 @@ window.DaystatCharts = (() => {
     const cssVar = (name) =>
         getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-    const palette = () => {
-        const dark = document.documentElement.classList.contains("dark");
-        return {
-            accent: cssVar("--accent"),
-            text: cssVar("--text-body"),
-            muted: cssVar("--text-muted"),
-            grid: dark ? "rgba(255,214,246,.10)" : "rgba(153,26,125,.10)",
-            tooltipBg: dark ? "rgba(44,7,36,.94)" : "rgba(255,255,255,.94)",
-            tooltipText: cssVar("--text-strong"),
-            line2: cssVar("--chart-line-2"),
-        };
-    };
+    const palette = () => ({
+        accent: cssVar("--accent"),
+        text: cssVar("--text-body"),
+        muted: cssVar("--text-muted"),
+        grid: cssVar("--chart-grid"),
+        tooltipBg: cssVar("--chart-tooltip"),
+        tooltipText: cssVar("--text-strong"),
+        line2: cssVar("--chart-line-2"),
+    });
 
     const fade = (ctx, color) => {
         const area = ctx.chart.chartArea;

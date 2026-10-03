@@ -8,4 +8,8 @@ User = get_user_model()
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email')
+        fields = ('first_name', 'last_name', 'email', 'gender')
+        widgets = {
+            # the radios are hidden, their labels make a segmented control
+            'gender': forms.RadioSelect(attrs={'class': 'sr-only'}),
+        }

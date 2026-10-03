@@ -19,6 +19,12 @@ urlpatterns = [
     path('expenses/weeks/', views.expenses_weeks, name='expenses_weeks'),
     path('expenses/months/', views.expenses_months, name='expenses_months'),
     path('expenses/', views.expenses, name='expenses'),
+    path('expenses/categories/', views.expense_categories,
+         name='expense_categories'),
+    path('expense_category_edit/<int:pk>/', views.expense_category_edit,
+         name='expense_category_edit'),
+    path('expense_category_delete/<int:pk>/', views.expense_category_delete,
+         name='expense_category_delete'),
     path('expense_delete/<int:pk>/', views.expense_delete,
          name='expense_delete'),
     # legacy urls kept as redirects

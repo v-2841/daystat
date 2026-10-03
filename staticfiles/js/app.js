@@ -6,9 +6,7 @@
     const paintChrome = (dark) => {
         document.querySelectorAll('meta[name="theme-color"]').forEach((tag) => {
             tag.media = "";
-            tag.content = dark
-                ? tag.dataset.dark || "#2c0724"
-                : tag.dataset.light || "#fdd8f6";
+            tag.content = dark ? tag.dataset.dark : tag.dataset.light;
         });
     };
     paintChrome(root.classList.contains("dark"));
@@ -83,6 +81,17 @@
         dialog
             .querySelectorAll("[data-dialog-close]")
             .forEach((close) => close.addEventListener("click", () => dialog.close()));
+    });
+
+    // ------------------------------------------------------- tab strips
+    // a strip wider than the screen scrolls the current tab into view
+    document.querySelectorAll(".overflow-x-auto").forEach((strip) => {
+        const current = strip.querySelector('[aria-current="page"]');
+        if (!current) return;
+        const overflow = current.getBoundingClientRect().right
+            - strip.getBoundingClientRect().right;
+        // plus the strip's own end padding
+        if (overflow > 0) strip.scrollLeft += overflow + 12;
     });
 
     // ------------------------------------------------ entrance animation

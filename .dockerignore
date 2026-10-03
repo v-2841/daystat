@@ -89,7 +89,8 @@ venv/
 .vscode/
 
 static/
-db.sqlite3
+# the database, its journal and any backup copies next to it
+db.sqlite3*
 
 # Tailwind CLI binary downloaded at build time
 .django_tailwind_cli/

@@ -16,10 +16,23 @@
         <form method="post" class="card space-y-3">
             {% csrf_token %}
             {% for field in form %}
-                <div>
-                    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field|field_class:"field" }}
-                </div>
+                {% if field.name == 'gender' %}
+                    <fieldset>
+                        <legend class="field-label">{{ field.label }}</legend>
+                        <div class="segment flex w-full">
+                            {% for radio in field %}
+                                {{ radio.tag }}
+                                <label class="segment-item flex-1 text-center"
+                                       for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                {% else %}
+                    <div>
+                        <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field|field_class:"field" }}
+                    </div>
+                {% endif %}
             {% endfor %}
             <button class="btn btn-primary w-full" type="submit">
                 {% icon "floppy-disk" "icon w-5 h-5" %}

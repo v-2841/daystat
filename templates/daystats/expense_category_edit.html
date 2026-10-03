@@ -1,23 +1,17 @@
 {% extends "base.html" %}
 {% load ui %}
 {% block title %}
-    Редактировать расход
+    Редактировать категорию
 {% endblock title %}
 {% block content %}
     <div class="mx-auto max-w-md">
-        <h1 class="page-title mb-4">Расход</h1>
+        <h1 class="page-title mb-4">Категория</h1>
         {% include "includes/form_errors.html" %}
         <form method="post" class="card space-y-3">
             {% csrf_token %}
-            <p class="muted text-sm">{{ expense.created_at|date:"j E Y, H:i" }}</p>
             <div>
-                <label class="field-label" for="{{ form.value.id_for_label }}">Сумма</label>
-                {{ form.value|field_class:"field tabular-nums" }}
-            </div>
-            {% include "includes/category_chips.html" %}
-            <div>
-                <label class="field-label" for="{{ form.note.id_for_label }}">Примечание</label>
-                {{ form.note|field_class:"field" }}
+                <label class="field-label" for="{{ form.name.id_for_label }}">Название</label>
+                {{ form.name|field_class:"field" }}
             </div>
             <div class="flex flex-col gap-2 pt-1 sm:flex-row">
                 <button class="btn btn-primary flex-1" type="submit">
@@ -30,16 +24,21 @@
                 </button>
             </div>
         </form>
+        <a class="btn btn-ghost mt-3 w-full"
+           href="{% url 'daystats:expense_categories' %}">
+            {% icon "caret-left" "icon w-5 h-5" %}
+            <span>Все категории</span>
+        </a>
     </div>
     <dialog class="glass glass-strong glass-sheen w-[min(24rem,92vw)] p-6 backdrop:bg-black/40 backdrop:backdrop-blur-sm"
             id="delete-dialog">
-        <h2 class="font-display mb-2 text-lg font-bold">Удалить запись?</h2>
-        <p class="muted mb-4 text-sm">Это действие нельзя отменить.</p>
+        <h2 class="font-display mb-2 text-lg font-bold">Удалить категорию?</h2>
+        <p class="muted mb-4 text-sm">Расходы останутся, но без категории.</p>
         <div class="flex gap-2">
             <button class="btn btn-ghost flex-1" type="button" data-dialog-close>Отмена</button>
             <form method="post"
                   class="flex-1"
-                  action="{% url 'daystats:expense_delete' expense.id %}">
+                  action="{% url 'daystats:expense_category_delete' category.id %}">
                 {% csrf_token %}
                 <button class="btn btn-danger w-full" type="submit">Удалить</button>
             </form>

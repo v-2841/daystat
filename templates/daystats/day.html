@@ -35,7 +35,10 @@
                 <span>Записано! Так держать.</span>
             </div>
         {% endif %}
-        <form method="post" class="card animate-rise">
+        {# the date is in the address: a page left open overnight still saves to its own day #}
+        <form method="post"
+              action="{% url 'daystats:daystats' date=date|date:'Y-m-d' %}"
+              class="card animate-rise">
             {% csrf_token %}
             <div class="flex items-center justify-between gap-4 py-3">
                 <label class="flex min-w-0 items-center gap-3"
@@ -59,23 +62,25 @@
                 </label>
                 <div class="w-24 shrink-0 sm:w-32">{{ form.calories|field_class:"field text-end tabular-nums" }}</div>
             </div>
-            <div class="rule-soft flex items-center justify-between gap-4 border-t py-3">
-                <label class="flex min-w-0 items-center gap-3" for="id_period_start">
-                    <span class="icon-plate h-11 w-11">{% icon "drop" "icon w-6 h-6" %}</span>
-                    <span class="min-w-0">
-                        <span class="font-display text-strong block font-bold">
-                            Цикл
-                            {% if period_day %}· день {{ period_day }}{% endif %}
+            {% if user.tracks_cycle %}
+                <div class="rule-soft flex items-center justify-between gap-4 border-t py-3">
+                    <label class="flex min-w-0 items-center gap-3" for="id_period_start">
+                        <span class="icon-plate h-11 w-11">{% icon "drop" "icon w-6 h-6" %}</span>
+                        <span class="min-w-0">
+                            <span class="font-display text-strong block font-bold">
+                                Цикл
+                                {% if period_day %}· день {{ period_day }}{% endif %}
+                            </span>
+                            <span class="muted block text-xs">начало нового цикла</span>
                         </span>
-                        <span class="muted block text-xs">начало нового цикла</span>
-                    </span>
-                </label>
-                <input class="switch shrink-0"
-                       type="checkbox"
-                       name="period_start"
-                       id="id_period_start"
-                       {% if form.period_start.value %}checked{% endif %}>
-            </div>
+                    </label>
+                    <input class="switch shrink-0"
+                           type="checkbox"
+                           name="period_start"
+                           id="id_period_start"
+                           {% if form.period_start.value %}checked{% endif %}>
+                </div>
+            {% endif %}
             <div class="mt-4 flex justify-center">
                 <button class="btn btn-primary w-full sm:w-auto sm:px-10" type="submit">
                     {% icon "floppy-disk" "icon w-5 h-5" %}

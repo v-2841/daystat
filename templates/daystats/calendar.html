@@ -6,23 +6,25 @@
 {% block content %}
     <h1 class="page-title mb-4">Календарь</h1>
     <section class="card mb-4 flex items-stretch gap-2 p-3 sm:gap-4 sm:p-5">
-        <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-            <span class="icon-plate hidden h-11 w-11 sm:flex">{% icon "drop" "icon w-6 h-6" %}</span>
-            <span class="min-w-0">
-                <span class="muted block text-[0.7rem] sm:text-xs">Следующий цикл</span>
-                <span class="font-display text-strong block truncate text-sm font-bold lowercase sm:text-base">
-                    {% if next_period.date %}
-                        {{ next_period.date|date:"j M" }}
-                    {% else %}
-                        —
-                    {% endif %}
+        {% if user.tracks_cycle %}
+            <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <span class="icon-plate hidden h-11 w-11 sm:flex">{% icon "drop" "icon w-6 h-6" %}</span>
+                <span class="min-w-0">
+                    <span class="muted block text-[0.7rem] sm:text-xs">Следующий цикл</span>
+                    <span class="font-display text-strong block truncate text-sm font-bold lowercase sm:text-base">
+                        {% if next_period.date %}
+                            {{ next_period.date|date:"j M" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+                    {% if next_period.date %}<span class="muted block text-[0.7rem]">{{ next_period.status }}</span>{% endif %}
                 </span>
-                {% if next_period.date %}<span class="muted block text-[0.7rem]">{{ next_period.status }}</span>{% endif %}
-            </span>
-        </div>
-        <div class="w-px shrink-0"
-             aria-hidden="true"
-             style="background: var(--glass-ring)"></div>
+            </div>
+            <div class="w-px shrink-0"
+                 aria-hidden="true"
+                 style="background: var(--glass-ring)"></div>
+        {% endif %}
         <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <span class="icon-plate hidden h-11 w-11 sm:flex">{% icon "scales" "icon w-6 h-6" %}</span>
             <span class="min-w-0">
@@ -104,9 +106,11 @@
                 </span>
                 вес и калории
             </span>
-            <span class="flex items-center gap-1.5"><i class="dot dot-period"></i>начало цикла</span>
-            <span class="flex items-center gap-1.5"><i class="dot dot-predicted"></i>прогноз</span>
-            <span class="flex items-center gap-1.5"><i class="dot dot-predicted dot-overdue"></i>задержка</span>
+            {% if user.tracks_cycle %}
+                <span class="flex items-center gap-1.5"><i class="dot dot-period"></i>начало цикла</span>
+                <span class="flex items-center gap-1.5"><i class="dot dot-predicted"></i>прогноз</span>
+                <span class="flex items-center gap-1.5"><i class="dot dot-predicted dot-overdue"></i>задержка</span>
+            {% endif %}
         </div>
     </section>
     <div class="glass glass-solid glass-sheen fixed inset-x-3 bottom-24 z-30 hidden p-4 lg:inset-x-auto lg:bottom-6 lg:end-6 lg:w-80"

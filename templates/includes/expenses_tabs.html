@@ -9,5 +9,8 @@
         <a class="segment-item"
            href="{% url 'daystats:expenses_months' %}"
            {% if tab == "months" %}aria-current="page"{% endif %}>По месяцам</a>
+        <a class="segment-item"
+           href="{% url 'daystats:expense_categories' %}"
+           {% if tab == "categories" %}aria-current="page"{% endif %}>Категории</a>
     </div>
 </nav>

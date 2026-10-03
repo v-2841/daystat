@@ -14,6 +14,8 @@ NAV_ALIASES = {
     'daystats:expenses_weeks': 'daystats:expenses',
     'daystats:expenses_months': 'daystats:expenses',
     'daystats:expense_edit': 'daystats:expenses',
+    'daystats:expense_categories': 'daystats:expenses',
+    'daystats:expense_category_edit': 'daystats:expenses',
 }
 
 

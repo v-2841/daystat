@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static ui %}
+{% block title %}
+    Категории расходов
+{% endblock title %}
+{% block content %}
+    <h1 class="page-title mb-4">Расходы</h1>
+    {% include "includes/expenses_tabs.html" %}
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
+        <section class="card">
+            <h2 class="mb-3 text-lg">Новая категория</h2>
+            {% include "includes/form_errors.html" %}
+            <form method="post" class="space-y-3">
+                {% csrf_token %}
+                <div>
+                    <label class="field-label" for="{{ form.name.id_for_label }}">Название</label>
+                    {{ form.name|field_class:"field" }}
+                </div>
+                <button class="btn btn-primary w-full" type="submit">
+                    {% icon "plus" "icon w-5 h-5" %}
+                    <span>Добавить</span>
+                </button>
+            </form>
+        </section>
+        <section class="card p-0 sm:p-0">
+            <header class="px-5 pt-5">
+                <h2 class="text-lg">Мои категории</h2>
+            </header>
+            {% if categories %}
+                <div class="mt-3">
+                    {% for category in categories %}
+                        <a class="list-row"
+                           href="{% url 'daystats:expense_category_edit' category.id %}">
+                            <span class="min-w-0">
+                                <span class="font-display text-strong block truncate font-bold">{{ category.name }}</span>
+                                <span class="muted block text-xs">расходов: {{ category.count }}</span>
+                            </span>
+                            <span class="flex shrink-0 items-center gap-3">
+                                <span class="font-display text-accent font-bold tabular-nums">{{ category.total|default:0|money }}</span>
+                                <span class="text-accent">{% icon "pencil-simple" "icon w-4 h-4" %}</span>
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="h-5"></div>
+            {% else %}
+                <div class="flex flex-col items-center gap-3 px-5 py-8 text-center">
+                    <img class="h-20 w-20 opacity-80"
+                         src="{% static 'img/cat-128.webp' %}"
+                         alt=""
+                         width="80"
+                         height="80">
+                    <p class="muted text-sm">Категорий пока нет</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+{% endblock content %}

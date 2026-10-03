@@ -15,6 +15,7 @@
                         <tr>
                             <th>{{ unit_label }}</th>
                             <th class="text-end">Сумма</th>
+                            <th>По категориям</th>
                             <th>Примечания</th>
                         </tr>
                     </thead>
@@ -23,8 +24,17 @@
                             <tr>
                                 <td class="whitespace-nowrap">{{ item.label }}</td>
                                 <td class="text-strong text-end font-bold tabular-nums">{{ item.sum_value|money }}</td>
-                                <td class="muted" title="{{ item.notes }}">
-                                    <span class="block max-w-md truncate">{{ item.notes|default:"—" }}</span>
+                                <td class="muted">
+                                    <div class="min-w-[14rem] wrap-anywhere">
+                                        {% if item.categories %}
+                                            {% include "includes/category_breakdown.html" with categories=item.categories %}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="muted w-full max-w-0" title="{{ item.notes }}">
+                                    <span class="block truncate">{{ item.notes|default:"—" }}</span>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -35,6 +45,11 @@
                         <div class="list-row">
                             <span class="min-w-0">
                                 <span class="font-display text-strong block font-bold">{{ item.label }}</span>
+                                {% if item.categories %}
+                                    <span class="muted block text-xs wrap-anywhere">
+                                        {% include "includes/category_breakdown.html" with categories=item.categories %}
+                                    </span>
+                                {% endif %}
                                 <span class="muted block truncate text-xs">{{ item.notes|default:"—" }}</span>
                             </span>
                             <span class="font-display text-accent shrink-0 font-bold tabular-nums">{{ item.sum_value|money }}</span>

@@ -1,0 +1,20 @@
+{# min-w-0: a fieldset is as wide as its widest chip by default #}
+<fieldset class="min-w-0">
+    <legend class="field-label">Категория</legend>
+    {% if form.category.field.queryset.exists %}
+        <div class="flex flex-wrap gap-2">
+            {% for radio in form.category %}
+                {{ radio.tag }}
+                <label class="chip"
+                       for="{{ radio.id_for_label }}"
+                       title="{{ radio.choice_label }}">{{ radio.choice_label }}</label>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted text-sm">
+            Категорий пока нет.
+            <a class="text-accent font-bold"
+               href="{% url 'daystats:expense_categories' %}">Добавить</a>
+        </p>
+    {% endif %}
+</fieldset>

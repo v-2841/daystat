@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(:root.dark, :root.dark *));
 
 @source "../../templates";
-@source "../js/*.js";
+@source "../../staticfiles/js/*.js";
 
 /* ---------------------------------------------------------------- fonts */
 @font-face {
@@ -64,6 +64,8 @@
     :root {
         color-scheme: light;
 
+        /* the 72% stop here and the 42% stop of the dark theme also colour
+           the browser chrome: core/context_processors/palette.py */
         --surface-page: linear-gradient(
             170deg,
             #fff7fd 0%,
@@ -94,6 +96,10 @@
         /* read by charts.js through getComputedStyle, so it must live in
            :root and not depend on @theme tree-shaking */
         --chart-line-2: #2b6fc4;
+        --chart-grid: rgb(153 26 125 / 0.1);
+        --chart-tooltip: rgb(255 255 255 / 0.94);
+        /* read by celebrate.js; the same in both themes */
+        --confetti: #991a7d #fdc3f5 #f5b544 #34c9a3 #58a6f5;
 
         --status-ok: #0a6e57;
         --status-ok-bg: rgb(52 201 163 / 0.2);
@@ -105,6 +111,36 @@
         --blob-1: rgb(253 195 245 / 0.85);
         --blob-2: rgb(153 26 125 / 0.18);
         --blob-3: rgb(88 166 245 / 0.16);
+    }
+
+    /* the blue palette of men's profiles: only the tokens that carry a hue,
+       the status colours keep their meaning */
+    :root[data-palette="blue"] {
+        --surface-page: linear-gradient(
+            170deg,
+            #f5f9ff 0%,
+            #e7f1ff 38%,
+            #d4e6fe 72%,
+            #c8dcf8 100%
+        );
+        --surface-sunken: rgb(26 92 173 / 0.06);
+        --surface-solid: rgb(245 249 255 / 0.96);
+        --glass-ring: rgb(26 92 173 / 0.1);
+        --glass-shadow: 0 18px 45px -22px rgb(12 38 76 / 0.45);
+        --glass-shadow-lift: 0 26px 50px -26px rgb(12 38 76 / 0.55);
+
+        --text-strong: #0c2a4c;
+        --text-body: #304d6b;
+        --text-muted: #4a6079;
+        --accent: #1a5cad;
+        --accent-soft: rgb(26 92 173 / 0.12);
+
+        --chart-grid: rgb(26 92 173 / 0.1);
+        --confetti: #1a5cad #bfdcff #f5b544 #34c9a3 #f08bc7;
+
+        --blob-1: rgb(190 220 255 / 0.85);
+        --blob-2: rgb(26 92 173 / 0.18);
+        --blob-3: rgb(88 205 220 / 0.18);
     }
 
     :root.dark {
@@ -135,6 +171,11 @@
         --accent-soft: rgb(249 168 224 / 0.16);
 
         --chart-line-2: #7cc0ff;
+        --chart-grid: rgb(255 214 246 / 0.1);
+        --chart-tooltip: rgb(44 7 36 / 0.94);
+
+        --sheen-strong: rgb(255 214 246 / 0.3);
+        --sheen-soft: rgb(255 214 246 / 0.12);
 
         --status-ok: #7be6c8;
         --status-ok-bg: rgb(52 201 163 / 0.16);
@@ -146,6 +187,39 @@
         --blob-1: rgb(153 26 125 / 0.5);
         --blob-2: rgb(222 119 204 / 0.22);
         --blob-3: rgb(43 111 196 / 0.22);
+    }
+
+    :root.dark[data-palette="blue"] {
+        --surface-page: linear-gradient(
+            170deg,
+            #07101d 0%,
+            #0a1a2e 42%,
+            #102339 74%,
+            #08121e 100%
+        );
+        --surface-glass: rgb(214 232 255 / 0.07);
+        --surface-glass-strong: rgb(214 232 255 / 0.12);
+        --surface-glass-soft: rgb(214 232 255 / 0.04);
+        --surface-solid: rgb(14 30 50 / 0.96);
+        --glass-border: rgb(214 232 255 / 0.14);
+        --glass-ring: rgb(214 232 255 / 0.08);
+
+        --text-strong: #e3effd;
+        --text-body: #c0d5ec;
+        --text-muted: #8aa4c0;
+        --accent: #8ec5ff;
+        --accent-contrast: #0a1a2e;
+        --accent-soft: rgb(142 197 255 / 0.16);
+
+        --chart-grid: rgb(214 232 255 / 0.1);
+        --chart-tooltip: rgb(10 26 46 / 0.94);
+
+        --sheen-strong: rgb(214 232 255 / 0.3);
+        --sheen-soft: rgb(214 232 255 / 0.12);
+
+        --blob-1: rgb(26 82 160 / 0.5);
+        --blob-2: rgb(110 170 240 / 0.22);
+        --blob-3: rgb(40 170 185 / 0.2);
     }
 
     html {
@@ -249,10 +323,10 @@
     :root.dark .card::before {
         background: linear-gradient(
             150deg,
-            rgb(255 214 246 / 0.3),
-            rgb(255 214 246 / 0) 45%,
-            rgb(255 214 246 / 0) 65%,
-            rgb(255 214 246 / 0.12)
+            var(--sheen-strong),
+            transparent 45%,
+            transparent 65%,
+            var(--sheen-soft)
         );
     }
 
@@ -441,6 +515,40 @@
         box-shadow: 0 8px 18px -10px var(--accent);
     }
 
+    /* --- choice chips (expense category) --- */
+    /* a long name is cut to the screen width, the label title shows it all */
+    .chip {
+        @apply inline-block max-w-full truncate rounded-full px-3.5 py-2 text-sm
+               font-bold cursor-pointer select-none;
+        color: var(--text-body);
+        background: var(--surface-glass-strong);
+        border: 1px solid var(--glass-border);
+        transition: color 0.2s ease, background-color 0.25s ease,
+            transform 0.35s var(--ease-spring);
+    }
+
+    .chip:hover {
+        color: var(--text-strong);
+        transform: translateY(-1px);
+    }
+
+    .chip:active {
+        transform: scale(0.95);
+    }
+
+    /* the real radio is sr-only, so mirror its focus ring onto the chip */
+    input:focus-visible + .chip {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    input:checked + .chip {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        border-color: transparent;
+        box-shadow: 0 8px 18px -10px var(--accent);
+    }
+
     /* --- navigation --- */
     .nav-link {
         @apply inline-flex items-center gap-2 rounded-full px-3.5 py-2
@@ -476,6 +584,21 @@
 
     .tab-link[aria-current="page"] .icon {
         transform: translateY(-1px) scale(1.08);
+    }
+
+    /* the stacked glass of the dark theme brightens what lies under the
+       controls, and muted text there falls below AA */
+    :root.dark .segment,
+    :root.dark .tab-link {
+        --text-muted: var(--text-body);
+    }
+
+    :root.dark .tab-link[aria-current="page"] {
+        color: var(--text-strong);
+    }
+
+    :root.dark .tab-link[aria-current="page"] .icon {
+        color: var(--accent);
     }
 
     .tab-link .icon {

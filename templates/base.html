@@ -1,6 +1,6 @@
 {% load static tailwind_cli %}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-palette="{{ palette }}">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport"
@@ -30,15 +30,15 @@
               color="#991a7d">
         {# app.js repaints these to match the chosen theme #}
         <meta name="theme-color"
-              content="#fdd8f6"
+              content="{{ theme_color.light }}"
               media="(prefers-color-scheme: light)"
-              data-light="#fdd8f6"
-              data-dark="#2c0724">
+              data-light="{{ theme_color.light }}"
+              data-dark="{{ theme_color.dark }}">
         <meta name="theme-color"
-              content="#2c0724"
+              content="{{ theme_color.dark }}"
               media="(prefers-color-scheme: dark)"
-              data-light="#fdd8f6"
-              data-dark="#2c0724">
+              data-light="{{ theme_color.light }}"
+              data-dark="{{ theme_color.dark }}">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-title" content="Daystat">
         <title>

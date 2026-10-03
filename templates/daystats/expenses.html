@@ -6,7 +6,7 @@
 {% block content %}
     <h1 class="page-title mb-4">Расходы</h1>
     {% include "includes/expenses_tabs.html" %}
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[22rem_1fr] lg:items-start">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
         <section class="card">
             <h2 class="mb-3 text-lg">Новый расход</h2>
             {% include "includes/form_errors.html" %}
@@ -16,6 +16,7 @@
                     <label class="field-label" for="{{ form.value.id_for_label }}">Сумма</label>
                     {{ form.value|field_class:"field tabular-nums" }}
                 </div>
+                {% include "includes/category_chips.html" %}
                 <div>
                     <label class="field-label" for="{{ form.note.id_for_label }}">Примечание</label>
                     {{ form.note|field_class:"field" }}
@@ -37,6 +38,7 @@
                         <tr>
                             <th>Когда</th>
                             <th class="text-end">Сумма</th>
+                            <th>Категория</th>
                             <th>Примечание</th>
                             <th></th>
                         </tr>
@@ -48,8 +50,12 @@
                                 data-url="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}">
                                 <td class="whitespace-nowrap">{{ expense.created_at|date:"j E, H:i" }}</td>
                                 <td class="text-strong text-end font-bold tabular-nums">{{ expense.value|money }}</td>
-                                <td class="muted" title="{{ expense.note }}">
-                                    <span class="block max-w-xs truncate">{{ expense.note|default:"—" }}</span>
+                                <td>
+                                    <span class="block max-w-[10rem] truncate"
+                                          title="{{ expense.category.name }}">{{ expense.category.name|default:"—" }}</span>
+                                </td>
+                                <td class="muted w-full max-w-0" title="{{ expense.note }}">
+                                    <span class="block truncate">{{ expense.note|default:"—" }}</span>
                                 </td>
                                 <td class="w-8 text-end">
                                     <a class="text-accent inline-flex rounded-lg p-1"
@@ -69,7 +75,10 @@
                            href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_m_{{ expense.id }}">
                             <span class="min-w-0">
                                 <span class="font-display text-strong block font-bold">{{ expense.value|money }}</span>
-                                <span class="muted block truncate text-xs">{{ expense.created_at|date:"j E, H:i" }}</span>
+                                <span class="muted block truncate text-xs">
+                                    {{ expense.created_at|date:"j E, H:i" }}
+                                    {% if expense.category %}· {{ expense.category.name }}{% endif %}
+                                </span>
                             </span>
                             <span class="muted min-w-0 max-w-[45%] truncate text-end text-sm">{{ expense.note|default:"" }}</span>
                         </a>

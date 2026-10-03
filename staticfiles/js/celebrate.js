@@ -21,7 +21,9 @@
         );
     }
 
-    const COLORS = ["#991a7d", "#fdc3f5", "#f5b544", "#34c9a3", "#58a6f5"];
+    // the palette of the profile: pink or blue
+    const COLORS = getComputedStyle(document.documentElement)
+        .getPropertyValue("--confetti").trim().split(/\s+/);
     const layer = document.createElement("div");
     layer.style.cssText =
         "position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden";
