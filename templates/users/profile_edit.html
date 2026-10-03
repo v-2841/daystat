@@ -16,7 +16,7 @@
         <form method="post" class="card space-y-3">
             {% csrf_token %}
             {% for field in form %}
-                {% if field.name == 'gender' %}
+                {% if field.name == "gender" %}
                     <fieldset>
                         <legend class="field-label">{{ field.label }}</legend>
                         <div class="segment flex w-full">

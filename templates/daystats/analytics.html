@@ -20,7 +20,7 @@
                {% if tab == 'weeks' %}aria-current="page"{% endif %}>Недели</a>
         </div>
     </nav>
-    {% if tab == 'trends' %}
+    {% if tab == "trends" %}
         <section class="card">
             <div class="mb-3 flex flex-wrap items-center gap-2">
                 <div class="segment" role="group" aria-label="Показатель">
@@ -81,7 +81,7 @@
                 <canvas id="myChart"></canvas>
             </div>
         </section>
-    {% elif tab == 'cycle' %}
+    {% elif tab == "cycle" %}
         <section class="card">
             <h2 class="mb-1 text-lg">Длина цикла и вес</h2>
             <p class="muted mb-3 text-sm">Точка цикла стоит на дате следующего начала — тогда его длина становится известна.</p>
@@ -130,12 +130,12 @@
     {% endif %}
 {% endblock content %}
 {% block extrabody %}
-    {% if tab == 'trends' or tab == 'cycle' %}
+    {% if tab == "trends" or tab == "cycle" %}
         <script src="{% static 'js/vendor/chart.umd.min.js' %}"></script>
         <script src="{% static 'js/vendor/luxon.min.js' %}"></script>
         <script src="{% static 'js/vendor/chartjs-adapter-luxon.umd.min.js' %}"></script>
         <script src="{% static 'js/charts.js' %}"></script>
-        {% if tab == 'trends' %}
+        {% if tab == "trends" %}
             <script src="{% static 'js/chart-trends.js' %}"></script>
         {% else %}
             <script src="{% static 'js/chart-cycle.js' %}"></script>
