@@ -13,6 +13,7 @@ window.DaystatCharts = (() => {
         tooltipBg: cssVar("--chart-tooltip"),
         tooltipText: cssVar("--text-strong"),
         line2: cssVar("--chart-line-2"),
+        surface: cssVar("--surface-solid"),
     });
 
     const fade = (ctx, color) => {

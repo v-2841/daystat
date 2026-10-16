@@ -47,6 +47,14 @@ SMOOTHING_WINDOWS = {
     'year': 10,
     '5years': 20,
 }
+# how many highs and how many lows the chart marks on each range
+KEY_POINT_COUNTS = {
+    'week': 1,
+    'month': 2,
+    '6months': 3,
+    'year': 4,
+    '5years': 5,
+}
 
 
 def format_date(date):
@@ -77,20 +85,82 @@ def moving_average(points, window_size):
     return smoothed_points
 
 
-def build_chart_points(daystats, field_name, range_name):
+def collect_points(daystats, field_name):
     points = []
     for daystat in daystats:
         value = getattr(daystat, field_name)
         if value is None:
             continue
         points.append((daystat.date, value))
+    return points
 
+
+def format_points(points):
+    return [[point_date.strftime('%Y-%m-%d'), value]
+            for point_date, value in points]
+
+
+def build_chart_points(points, range_name):
     window_size = SMOOTHING_WINDOWS.get(range_name)
     if window_size:
         points = moving_average(points, window_size)
+    return format_points(points)
 
-    return [[point_date.strftime('%Y-%m-%d'), value]
-            for point_date, value in points]
+
+def peak_prominences(values):
+    """How far every local maximum rises above the deepest dip that
+    separates it from a higher value, by index.
+
+    A side that runs into the edge of the period without a higher value
+    is left out: the period cuts the hill there, it is not a dip. The
+    highest value has neither side and is measured from the lowest one,
+    so it always ranks first.
+    """
+    lowest = min(values)
+    prominences = {}
+    for index, value in enumerate(values):
+        if index > 0 and values[index - 1] >= value:
+            continue
+        if index < len(values) - 1 and values[index + 1] > value:
+            continue
+        dips = []
+        for step in (-1, 1):
+            dip = value
+            position = index + step
+            while 0 <= position < len(values) and values[position] <= value:
+                dip = min(dip, values[position])
+                position += step
+            if 0 <= position < len(values):
+                dips.append(dip)
+        prominences[index] = value - max(dips, default=lowest)
+    return prominences
+
+
+def pick_peaks(points, values, count):
+    """The `count` most prominent peaks of values, kept 1/(2 * count) of
+    the period apart so that they mark different stretches of it."""
+    min_gap = (points[-1][0] - points[0][0]) / (2 * count)
+    prominences = peak_prominences(values)
+    picked = []
+    for index in sorted(prominences, key=prominences.get, reverse=True):
+        if len(picked) == count or prominences[index] <= 0:
+            break
+        if all(abs(points[index][0] - points[other][0]) >= min_gap
+               for other in picked):
+            picked.append(index)
+    return format_points(points[index] for index in sorted(picked))
+
+
+def build_key_points(points, range_name):
+    """The real highs and lows of the period that the chart labels:
+    the smoothed line flattens them on the longer ranges."""
+    values = [value for _, value in points]
+    if not values or min(values) == max(values):
+        return [], []
+    count = KEY_POINT_COUNTS[range_name]
+    highs = pick_peaks(points, values, count)
+    lows = pick_peaks(points, [-value for value in values], count)
+    return highs, lows
 
 
 def get_range_name_for_dates(start_date, end_date):
@@ -415,7 +485,6 @@ def chart_api(request, type, range):
         raise Http404('Неизвестный график')
 
     dataset = {}
-    dataset['data'] = []
     today = timezone.localdate()
     start = today - DATE_RANGE[range]
     end = today
@@ -426,10 +495,11 @@ def chart_api(request, type, range):
     ).order_by('date')
     if type == 'weight':
         dataset['title'] = 'Вес, кг'
-        dataset['data'] = build_chart_points(daystats, 'weight', range)
     elif type == 'calories':
         dataset['title'] = 'Калории, ккал'
-        dataset['data'] = build_chart_points(daystats, 'calories', range)
+    points = collect_points(daystats, type)
+    dataset['data'] = build_chart_points(points, range)
+    dataset['highs'], dataset['lows'] = build_key_points(points, range)
     return JsonResponse(dataset)
 
 
@@ -443,11 +513,11 @@ def cycle_weight_chart_api(request):
         ).order_by('date')
     )
 
-    weighed = [daystat for daystat in daystats if daystat.weight is not None]
-    if weighed:
+    weights = collect_points(daystats, 'weight')
+    if weights:
         range_name = get_range_name_for_dates(
-            weighed[0].date,
-            weighed[-1].date,
+            weights[0][0],
+            weights[-1][0],
         )
     else:
         range_name = 'week'
@@ -458,7 +528,7 @@ def cycle_weight_chart_api(request):
                 'data': build_cycle_length_points(daystats),
             },
             {
-                'data': build_chart_points(daystats, 'weight', range_name),
+                'data': build_chart_points(weights, range_name),
             },
         ],
     }

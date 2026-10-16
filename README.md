@@ -57,6 +57,14 @@ year, and five years. Longer ranges smooth the
 data with the same moving-average helper used by the chart API, so long-term
 trends are easier to read.
 
+Smoothing flattens the real highs and lows, so the chart also marks the real
+days and labels their values: one high and one low on a week, two of each on
+a month, three on six months, four on a year, and five on five years. They are
+the most prominent peaks and dips of the raw values (the highest and the
+lowest day always among them), kept apart so that they mark different
+stretches of the period. The chart API returns them as `highs` and `lows`
+next to `data`.
+
 The cycle tab compares completed cycle lengths with smoothed weight
 over the full available history. Cycle length points are plotted on the date of
 the next cycle start, because that is when the previous cycle length becomes
