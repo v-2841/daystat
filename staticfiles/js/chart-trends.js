@@ -50,10 +50,45 @@
         },
     };
 
+    // a tap this close to a key point picks it: on a long range a finger
+    // would otherwise land on one of the dense neighbouring dates of the line
+    const keyHitRadius = 24;
+
+    // the key point within reach together with the line on the same day,
+    // or the nearest date when there is none
+    Chart.Interaction.modes.keyPoint = (chart, event, options, useFinal) => {
+        let hit = null;
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            if (!dataset.keyPoint) return;
+            chart.getDatasetMeta(datasetIndex).data.forEach((element, index) => {
+                const { x, y } = element.getProps(["x", "y"], useFinal);
+                const distance = Math.hypot(x - event.x, y - event.y);
+                if (distance <= keyHitRadius && (!hit || distance < hit.distance)) {
+                    hit = { element, datasetIndex, index, distance };
+                }
+            });
+        });
+        if (!hit) {
+            return Chart.Interaction.modes.nearest(chart, event, options, useFinal);
+        }
+        const items = [
+            { element: hit.element, datasetIndex: hit.datasetIndex, index: hit.index },
+        ];
+        const [day] = chart.data.datasets[hit.datasetIndex].data[hit.index];
+        const line = chart.data.datasets[0].data.findIndex(([date]) => date === day);
+        if (line !== -1) {
+            items.push({
+                element: chart.getDatasetMeta(0).data[line],
+                datasetIndex: 0,
+                index: line,
+            });
+        }
+        return items;
+    };
+
     const colors = palette();
     const options = baseOptions();
-    // the key points share dates with the line, so both show in the tooltip
-    options.interaction = { mode: "nearest", axis: "x", intersect: false };
+    options.interaction = { mode: "keyPoint", axis: "x", intersect: false };
     // room for the labels above the highs and below the lows
     options.scales.y.grace = "12%";
     options.plugins.keyLabels = {

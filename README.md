@@ -63,7 +63,8 @@ a month, three on six months, four on a year, and five on five years. They are
 the most prominent peaks and dips of the raw values (the highest and the
 lowest day always among them), kept apart so that they mark different
 stretches of the period. The chart API returns them as `highs` and `lows`
-next to `data`.
+next to `data`. A tap or hover within 24 px of a key point picks it, so on a
+long range a finger does not land on a neighbouring date of the line.
 
 The cycle tab compares completed cycle lengths with smoothed weight
 over the full available history. Cycle length points are plotted on the date of
