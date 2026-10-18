@@ -96,11 +96,10 @@ A category is optional, so expenses recorded before categories existed stay
 uncategorized, and deleting a category keeps its expenses without one.
 
 There are also weekly and monthly expense summary pages. They group expenses by
-calendar period, total the values, break the total down by category, and
-concatenate notes so repeated spending patterns are easier to scan. An
-expense without a category counts under its note instead, with the same
-notes summed into one line and a note joining a category of the same name;
-only expenses with neither stay «Без категории». A period of such bare
+calendar period, total the values, and break the total down by category. An
+expense without a category counts under its note instead, with the same notes
+summed into one line and a note joining a category of the same name; only
+expenses with neither stay «Без категории». A period of such bare
 amounts only gets no breakdown. Every period opens a page with all its
 expenses, so older records can be fixed too.
 

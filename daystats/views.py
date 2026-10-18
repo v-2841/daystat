@@ -685,10 +685,8 @@ def group_expenses(expenses, key_func, label_func, url_name):
     for year, groups in grouped.items():
         data[year] = {}
         for key, items in groups.items():
-            notes = ', '.join(item.note for item in items if item.note)
             data[year][key] = {
                 'sum_value': sum(item.value for item in items),
-                'notes': notes,
                 'categories': build_breakdown(items),
                 'label': label_func(key),
                 # the page with every expense of the period, to fix one

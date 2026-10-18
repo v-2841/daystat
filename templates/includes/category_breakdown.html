@@ -1,5 +1,5 @@
 {% load ui %}
+{# the separator sticks to the amount before it, so a wrapped line never starts with it #}
 {% for name, total in categories %}
-    {{ name }}&nbsp;<span class="text-strong font-bold tabular-nums whitespace-nowrap">{{ total|money }}</span>
-    {% if not forloop.last %}·{% endif %}
+    {{ name }}&nbsp;<span class="whitespace-nowrap"><span class="text-strong font-bold tabular-nums">{{ total|money }}</span>{% if not forloop.last %}&nbsp;·{% endif %}</span>
 {% endfor %}
