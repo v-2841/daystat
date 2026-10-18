@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load ui %}
+{% load static ui %}
 {% block title %}
     Расходы {% if tab == "weeks" %}по неделям{% else %}по месяцам{% endif %}
 {% endblock title %}
@@ -21,8 +21,10 @@
                     </thead>
                     <tbody>
                         {% for key, item in groups.items %}
-                            <tr>
-                                <td class="whitespace-nowrap">{{ item.label }}</td>
+                            <tr class="expense-row cursor-pointer" data-url="{{ item.url }}">
+                                <td class="whitespace-nowrap">
+                                    <a class="text-accent font-bold" href="{{ item.url }}">{{ item.label }}</a>
+                                </td>
                                 <td class="text-strong text-end font-bold tabular-nums">{{ item.sum_value|money }}</td>
                                 <td class="muted">
                                     <div class="min-w-[14rem] wrap-anywhere">
@@ -42,7 +44,7 @@
                 </table>
                 <div class="mt-2 sm:hidden">
                     {% for key, item in groups.items %}
-                        <div class="list-row">
+                        <a class="list-row" href="{{ item.url }}">
                             <span class="min-w-0">
                                 <span class="font-display text-strong block font-bold">{{ item.label }}</span>
                                 {% if item.categories %}
@@ -53,7 +55,7 @@
                                 <span class="muted block truncate text-xs">{{ item.notes|default:"—" }}</span>
                             </span>
                             <span class="font-display text-accent shrink-0 font-bold tabular-nums">{{ item.sum_value|money }}</span>
-                        </div>
+                        </a>
                     {% endfor %}
                 </div>
                 <div class="h-5"></div>
@@ -63,3 +65,6 @@
         {% endfor %}
     </section>
 {% endblock content %}
+{% block extrabody %}
+    <script src="{% static 'js/expenses.js' %}"></script>
+{% endblock extrabody %}

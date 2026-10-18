@@ -1,0 +1,59 @@
+{% load ui %}
+{# every expense opens its edit form, which comes back to this page and row #}
+<table class="data-table mt-3 hidden sm:table">
+    <thead>
+        <tr>
+            <th>Когда</th>
+            <th class="text-end">Сумма</th>
+            <th>Категория</th>
+            <th>Примечание</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+            <tr class="expense-row cursor-pointer"
+                id="expense_{{ expense.id }}"
+                data-url="{% url 'daystats:expense_edit' expense.id %}?next={{ request.path|urlencode }}%23expense_{{ expense.id }}">
+                <td class="whitespace-nowrap">{{ expense.created_at|date:"j E, H:i" }}</td>
+                <td class="text-strong text-end font-bold tabular-nums">
+                    {{ expense.value|money }}
+                    {% if expense.excluded_from_week %}
+                        <span class="muted block text-xs font-normal whitespace-nowrap">не в итоге недели</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="block max-w-[10rem] truncate"
+                          title="{{ expense.category.name }}">{{ expense.category.name|default:"—" }}</span>
+                </td>
+                <td class="muted w-full max-w-0" title="{{ expense.note }}">
+                    <span class="block truncate">{{ expense.note|default:"—" }}</span>
+                </td>
+                <td class="w-8 text-end">
+                    <a class="text-accent inline-flex rounded-lg p-1"
+                       href="{% url 'daystats:expense_edit' expense.id %}?next={{ request.path|urlencode }}%23expense_{{ expense.id }}"
+                       aria-label="Изменить расход {{ expense.value }} за {{ expense.created_at|date:'j E, H:i' }}">
+                        {% icon "pencil-simple" "icon w-4 h-4" %}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="mt-3 sm:hidden">
+    {% for expense in expenses %}
+        <a class="list-row"
+           id="expense_m_{{ expense.id }}"
+           href="{% url 'daystats:expense_edit' expense.id %}?next={{ request.path|urlencode }}%23expense_m_{{ expense.id }}">
+            <span class="min-w-0">
+                <span class="font-display text-strong block font-bold">{{ expense.value|money }}</span>
+                {% if expense.excluded_from_week %}<span class="muted block text-xs">не в итоге недели</span>{% endif %}
+                <span class="muted block truncate text-xs">
+                    {{ expense.created_at|date:"j E, H:i" }}
+                    {% if expense.category %}· {{ expense.category.name }}{% endif %}
+                </span>
+            </span>
+            <span class="muted min-w-0 max-w-[45%] truncate text-end text-sm">{{ expense.note|default:"" }}</span>
+        </a>
+    {% endfor %}
+</div>

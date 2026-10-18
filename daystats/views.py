@@ -42,6 +42,7 @@ PREDICTION_HORIZON = datetime.timedelta(days=365)
 # than a real cycle, so it is left out of the prediction
 CYCLE_DAYS_MIN = 15
 CYCLE_DAYS_MAX = 60
+UNCATEGORIZED = 'Без категории'
 SMOOTHING_WINDOWS = {
     '6months': 5,
     'year': 10,
@@ -61,13 +62,16 @@ def format_date(date):
     return date_format(date, 'j E Y')
 
 
+def local_midnight(date):
+    return timezone.make_aware(
+        datetime.datetime.combine(date, datetime.time.min),
+    )
+
+
 def current_week_start():
     """Midnight of the Monday of the current week, in the local timezone."""
     today = timezone.localdate()
-    monday = today - datetime.timedelta(days=today.weekday())
-    return timezone.make_aware(
-        datetime.datetime.combine(monday, datetime.time.min),
-    )
+    return local_midnight(today - datetime.timedelta(days=today.weekday()))
 
 
 def moving_average(points, window_size):
@@ -283,6 +287,7 @@ def home(request):
     week_expenses = Expense.objects.filter(
         user=user,
         created_at__gte=current_week_start(),
+        excluded_from_week=False,
     ).aggregate(total=Sum('value'))['total'] or 0
 
     context = {
@@ -548,8 +553,10 @@ def expenses(request):
         return redirect(f'{request.path}?saved=1')
     context = {
         'week_expenses': week_expenses,
+        # an excluded expense stays in the list, marked, but not in the total
         'week_total': sum(
             expense.value for expense in week_expenses
+            if not expense.excluded_from_week
         ),
         'form': form,
         'tab': 'list',
@@ -558,9 +565,8 @@ def expenses(request):
     return render(request, 'daystats/expenses.html', context)
 
 
-@login_required
-def expense_edit(request, pk):
-    expense = get_object_or_404(Expense, pk=pk, user=request.user)
+def get_next_page(request):
+    """The page an expense form returns to: the list it was opened from."""
     # only a real path is accepted: a view name here would blow up in reverse()
     next_page = request.GET.get('next', '')
     if not next_page.startswith('/') or not url_has_allowed_host_and_scheme(
@@ -569,6 +575,13 @@ def expense_edit(request, pk):
         require_https=request.is_secure(),
     ):
         next_page = reverse('daystats:expenses')
+    return next_page
+
+
+@login_required
+def expense_edit(request, pk):
+    expense = get_object_or_404(Expense, pk=pk, user=request.user)
+    next_page = get_next_page(request)
     form = ExpenseForm(request.POST or None, instance=expense)
     if request.method == 'POST' and form.is_valid():
         form.save()
@@ -576,6 +589,7 @@ def expense_edit(request, pk):
     context = {
         'form': form,
         'expense': expense,
+        'next_page': next_page,
     }
     return render(request, 'daystats/expense_edit.html', context)
 
@@ -585,7 +599,7 @@ def expense_delete(request, pk):
     expense = get_object_or_404(Expense, pk=pk, user=request.user)
     if request.method == 'POST':
         expense.delete()
-    return redirect('daystats:expenses')
+    return redirect(get_next_page(request))
 
 
 @login_required
@@ -633,7 +647,34 @@ def expense_category_delete(request, pk):
     return redirect('daystats:expense_categories')
 
 
-def group_expenses(expenses, key_func, label_func):
+def breakdown_line(expense):
+    """The line of a summary breakdown an expense counts towards: its
+    category, or else its note, which is how the expenses recorded before
+    the categories tell what they were for."""
+    if expense.category:
+        return expense.category.name
+    if expense.note and expense.note.strip():
+        return expense.note.strip()
+    return UNCATEGORIZED
+
+
+def build_breakdown(items):
+    totals = {}
+    for item in items:
+        line = breakdown_line(item)
+        # a note «такси» joins the category «Такси», shown as the category
+        key = alphabetical(line)
+        name, total = totals.get(key, (line, 0))
+        if item.category:
+            name = line
+        totals[key] = (name, total + item.value)
+    # a period of bare amounts needs no breakdown
+    if set(totals) == {alphabetical(UNCATEGORIZED)}:
+        return []
+    return sorted(totals.values(), key=lambda pair: pair[1], reverse=True)
+
+
+def group_expenses(expenses, key_func, label_func, url_name):
     grouped = defaultdict(lambda: defaultdict(list))
     for expense in expenses:
         local_time = timezone.localtime(expense.created_at)
@@ -645,19 +686,13 @@ def group_expenses(expenses, key_func, label_func):
         data[year] = {}
         for key, items in groups.items():
             notes = ', '.join(item.note for item in items if item.note)
-            totals = defaultdict(int)
-            for item in items:
-                totals[item.category] += item.value
-            # a period recorded before the categories needs no breakdown
-            categories = []
-            if any(totals):
-                categories = sorted(totals.items(),
-                                    key=lambda pair: pair[1], reverse=True)
             data[year][key] = {
                 'sum_value': sum(item.value for item in items),
                 'notes': notes,
-                'categories': categories,
+                'categories': build_breakdown(items),
                 'label': label_func(key),
+                # the page with every expense of the period, to fix one
+                'url': reverse(url_name, args=(year, key)),
             }
     return data
 
@@ -666,12 +701,14 @@ def group_expenses(expenses, key_func, label_func):
 def expenses_weeks(request):
     expenses = Expense.objects.filter(
         user=request.user,
+        excluded_from_week=False,
     ).select_related('category')
     context = {
         'data': group_expenses(
             expenses,
             lambda dt: dt.isocalendar()[:2],
             lambda week: f'Неделя {week}',
+            'daystats:expenses_week',
         ),
         'tab': 'weeks',
         'unit_label': 'Неделя',
@@ -689,8 +726,64 @@ def expenses_months(request):
             expenses,
             lambda dt: (dt.year, dt.month),
             lambda month: MONTH_NAMES[month].capitalize(),
+            'daystats:expenses_month',
         ),
         'tab': 'months',
         'unit_label': 'Месяц',
     }
     return render(request, 'daystats/expenses_summary.html', context)
+
+
+def period_expenses(user, first_day, end_day):
+    """The expenses from first_day up to, but not including, end_day."""
+    return Expense.objects.filter(
+        user=user,
+        created_at__gte=local_midnight(first_day),
+        created_at__lt=local_midnight(end_day),
+    ).select_related('category')
+
+
+@login_required
+def expenses_week(request, year, week):
+    try:
+        monday = datetime.date.fromisocalendar(year, week, 1)
+        next_monday = monday + datetime.timedelta(days=7)
+    except (ValueError, OverflowError):
+        raise Http404('Нет такой недели')
+    sunday = next_monday - datetime.timedelta(days=1)
+    if monday.month == sunday.month:
+        dates = f'{monday.day}–{format_date(sunday)}'
+    else:
+        first_format = 'j E' if monday.year == sunday.year else 'j E Y'
+        dates = f'{date_format(monday, first_format)} – {format_date(sunday)}'
+    expenses = period_expenses(request.user, monday, next_monday)
+    context = {
+        'title': f'Неделя {week}',
+        'dates': dates,
+        'expenses': expenses,
+        # the same total as the weekly summary shows
+        'total': sum(
+            expense.value for expense in expenses
+            if not expense.excluded_from_week
+        ),
+        'tab': 'weeks',
+    }
+    return render(request, 'daystats/expenses_period.html', context)
+
+
+@login_required
+def expenses_month(request, year, month):
+    try:
+        first_day = datetime.date(year, month, 1)
+        # 31 days from the 1st always land in the next month
+        end_day = (first_day + datetime.timedelta(days=31)).replace(day=1)
+    except (ValueError, OverflowError):
+        raise Http404('Нет такого месяца')
+    expenses = period_expenses(request.user, first_day, end_day)
+    context = {
+        'title': f'{MONTH_NAMES[month].capitalize()} {year}',
+        'expenses': expenses,
+        'total': sum(expense.value for expense in expenses),
+        'tab': 'months',
+    }
+    return render(request, 'daystats/expenses_period.html', context)

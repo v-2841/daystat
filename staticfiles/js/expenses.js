@@ -1,4 +1,4 @@
-// Whole-row click targets in the desktop expenses table.
+// Whole-row click targets in the desktop expense tables and summaries.
 (() => {
     document.querySelectorAll(".expense-row").forEach((row) => {
         let startX = 0;

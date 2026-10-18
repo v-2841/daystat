@@ -19,6 +19,7 @@
                 <label class="field-label" for="{{ form.note.id_for_label }}">Примечание</label>
                 {{ form.note|field_class:"field" }}
             </div>
+            {% include "includes/expense_week_switch.html" %}
             <div class="flex flex-col gap-2 pt-1 sm:flex-row">
                 <button class="btn btn-primary flex-1" type="submit">
                     {% icon "floppy-disk" "icon w-5 h-5" %}
@@ -39,7 +40,7 @@
             <button class="btn btn-ghost flex-1" type="button" data-dialog-close>Отмена</button>
             <form method="post"
                   class="flex-1"
-                  action="{% url 'daystats:expense_delete' expense.id %}">
+                  action="{% url 'daystats:expense_delete' expense.id %}?next={{ next_page|urlencode }}">
                 {% csrf_token %}
                 <button class="btn btn-danger w-full" type="submit">Удалить</button>
             </form>

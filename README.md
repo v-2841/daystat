@@ -83,7 +83,12 @@ spans the new year as a single row.
 The expense tracker stores expense records with a value, an optional category,
 and an optional note. The main expense page shows the expenses of the current
 week and provides a form for adding new ones; the category is picked with chips.
-Existing expenses can be opened from the table, edited, or deleted.
+Existing expenses can be opened from the table, edited, or deleted; the form
+then returns to the list it was opened from.
+
+A very large purchase can be marked «Не учитывать за неделю». It stays in the
+week's list, marked, but is left out of every weekly total: the home tile, the
+current week, and the weekly summary. The monthly summary still counts it.
 
 Every user keeps their own list of categories on the «Категории» tab: add,
 rename, or delete them there. Names are unique per user regardless of case.
@@ -92,8 +97,12 @@ uncategorized, and deleting a category keeps its expenses without one.
 
 There are also weekly and monthly expense summary pages. They group expenses by
 calendar period, total the values, break the total down by category, and
-concatenate notes so repeated spending patterns are easier to scan. A period
-with uncategorized expenses only gets no breakdown.
+concatenate notes so repeated spending patterns are easier to scan. An
+expense without a category counts under its note instead, with the same
+notes summed into one line and a note joining a category of the same name;
+only expenses with neither stay «Без категории». A period of such bare
+amounts only gets no breakdown. Every period opens a page with all its
+expenses, so older records can be fixed too.
 
 ### User Account
 
@@ -218,6 +227,8 @@ docker compose logs -f app
 - `/expenses/` - expense tracker.
 - `/expenses/weeks/` - weekly expense summary.
 - `/expenses/months/` - monthly expense summary.
+- `/expenses/weeks/<year>/<week>/`, `/expenses/months/<year>/<month>/` - all
+  expenses of an ISO week or a month.
 - `/expenses/categories/` - the user's expense categories.
 - `/auth/login/`, `/auth/logout/` - sign in and out.
 - `/auth/profile_edit/` - profile, including gender.

@@ -37,7 +37,7 @@ class AlphabeticalIterator(ModelChoiceIterator):
 class ExpenseForm(ModelForm):
     class Meta:
         model = Expense
-        fields = ['value', 'category', 'note']
+        fields = ['value', 'category', 'note', 'excluded_from_week']
         widgets = {
             # the radios are hidden, their labels are the chips
             'category': RadioSelect(attrs={'class': 'sr-only'}),

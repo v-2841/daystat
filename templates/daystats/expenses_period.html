@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static ui %}
+{% block title %}
+    Расходы · {{ title }}
+{% endblock title %}
+{% block content %}
+    <h1 class="page-title mb-4">Расходы</h1>
+    {% include "includes/expenses_tabs.html" %}
+    <section class="card p-0 sm:p-0">
+        <header class="flex items-baseline justify-between gap-3 px-5 pt-5">
+            <div class="min-w-0">
+                <h2 class="text-lg">{{ title }}</h2>
+                {% if dates %}<p class="muted text-sm">{{ dates }}</p>{% endif %}
+            </div>
+            <span class="font-display text-accent text-xl font-bold tabular-nums">{{ total|money }}</span>
+        </header>
+        {% if expenses %}
+            {% include "includes/expense_list.html" %}
+            <div class="h-5"></div>
+        {% else %}
+            <p class="muted px-5 py-8 text-center text-sm">За этот период расходов нет</p>
+        {% endif %}
+    </section>
+{% endblock content %}
+{% block extrabody %}
+    <script src="{% static 'js/expenses.js' %}"></script>
+{% endblock extrabody %}

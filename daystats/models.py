@@ -121,6 +121,12 @@ class Expense(models.Model):
         null=True,
         verbose_name='Примечание',
     )
+    # a very large purchase would dwarf the weekly totals; the monthly
+    # summary still counts it
+    excluded_from_week = models.BooleanField(
+        default=False,
+        verbose_name='Не учитывать за неделю',
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

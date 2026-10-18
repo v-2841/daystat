@@ -1,0 +1,8 @@
+{% load ui %}
+<div class="flex items-center justify-between gap-4">
+    <label class="min-w-0" for="{{ form.excluded_from_week.id_for_label }}">
+        <span class="field-label mb-0">Не учитывать за неделю</span>
+        <span class="muted block text-xs">Крупная трата не попадёт в итоги недели</span>
+    </label>
+    {{ form.excluded_from_week|field_class:"switch" }}
+</div>

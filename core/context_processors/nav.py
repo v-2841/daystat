@@ -12,7 +12,9 @@ NAV_ITEMS = (
 NAV_ALIASES = {
     'daystats:daystats': 'daystats:day',
     'daystats:expenses_weeks': 'daystats:expenses',
+    'daystats:expenses_week': 'daystats:expenses',
     'daystats:expenses_months': 'daystats:expenses',
+    'daystats:expenses_month': 'daystats:expenses',
     'daystats:expense_edit': 'daystats:expenses',
     'daystats:expense_categories': 'daystats:expenses',
     'daystats:expense_category_edit': 'daystats:expenses',

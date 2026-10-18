@@ -24,8 +24,8 @@ class ExpenseCategoryAdmin(admin.ModelAdmin):
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
     list_display = ['created_at', 'user', 'value', 'category', 'note',
-                    'week']
-    list_filter = ['user', 'category']
+                    'excluded_from_week', 'week']
+    list_filter = ['user', 'category', 'excluded_from_week']
     # the category may be empty, and a bare select_related() skips such keys
     list_select_related = ['user', 'category']
 

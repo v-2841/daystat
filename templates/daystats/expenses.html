@@ -21,6 +21,7 @@
                     <label class="field-label" for="{{ form.note.id_for_label }}">Примечание</label>
                     {{ form.note|field_class:"field" }}
                 </div>
+                {% include "includes/expense_week_switch.html" %}
                 <button class="btn btn-primary w-full" type="submit">
                     {% icon "plus" "icon w-5 h-5" %}
                     <span>Добавить</span>
@@ -33,57 +34,7 @@
                 <span class="font-display text-accent text-xl font-bold tabular-nums">{{ week_total|money }}</span>
             </header>
             {% if week_expenses %}
-                <table class="data-table mt-3 hidden sm:table">
-                    <thead>
-                        <tr>
-                            <th>Когда</th>
-                            <th class="text-end">Сумма</th>
-                            <th>Категория</th>
-                            <th>Примечание</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for expense in week_expenses %}
-                            <tr class="expense-row cursor-pointer"
-                                id="expense_{{ expense.id }}"
-                                data-url="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}">
-                                <td class="whitespace-nowrap">{{ expense.created_at|date:"j E, H:i" }}</td>
-                                <td class="text-strong text-end font-bold tabular-nums">{{ expense.value|money }}</td>
-                                <td>
-                                    <span class="block max-w-[10rem] truncate"
-                                          title="{{ expense.category.name }}">{{ expense.category.name|default:"—" }}</span>
-                                </td>
-                                <td class="muted w-full max-w-0" title="{{ expense.note }}">
-                                    <span class="block truncate">{{ expense.note|default:"—" }}</span>
-                                </td>
-                                <td class="w-8 text-end">
-                                    <a class="text-accent inline-flex rounded-lg p-1"
-                                       href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_{{ expense.id }}"
-                                       aria-label="Изменить расход {{ expense.value }} за {{ expense.created_at|date:'j E, H:i' }}">
-                                        {% icon "pencil-simple" "icon w-4 h-4" %}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <div class="mt-3 sm:hidden">
-                    {% for expense in week_expenses %}
-                        <a class="list-row"
-                           id="expense_m_{{ expense.id }}"
-                           href="{% url 'daystats:expense_edit' expense.id %}?next={% url 'daystats:expenses' %}#expense_m_{{ expense.id }}">
-                            <span class="min-w-0">
-                                <span class="font-display text-strong block font-bold">{{ expense.value|money }}</span>
-                                <span class="muted block truncate text-xs">
-                                    {{ expense.created_at|date:"j E, H:i" }}
-                                    {% if expense.category %}· {{ expense.category.name }}{% endif %}
-                                </span>
-                            </span>
-                            <span class="muted min-w-0 max-w-[45%] truncate text-end text-sm">{{ expense.note|default:"" }}</span>
-                        </a>
-                    {% endfor %}
-                </div>
+                {% include "includes/expense_list.html" with expenses=week_expenses %}
                 <div class="h-5"></div>
             {% else %}
                 <div class="flex flex-col items-center gap-3 px-5 py-8 text-center">
