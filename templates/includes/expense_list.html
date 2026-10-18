@@ -19,7 +19,7 @@
                 <td class="text-strong text-end font-bold tabular-nums">
                     {{ expense.value|money }}
                     {% if expense.excluded_from_week %}
-                        <span class="muted block text-xs font-normal whitespace-nowrap">не в итоге недели</span>
+                        <span class="muted block text-xs font-normal whitespace-nowrap">Не в итоге недели</span>
                     {% endif %}
                 </td>
                 <td>
@@ -47,7 +47,7 @@
            href="{% url 'daystats:expense_edit' expense.id %}?next={{ request.path|urlencode }}%23expense_m_{{ expense.id }}">
             <span class="min-w-0">
                 <span class="font-display text-strong block font-bold">{{ expense.value|money }}</span>
-                {% if expense.excluded_from_week %}<span class="muted block text-xs">не в итоге недели</span>{% endif %}
+                {% if expense.excluded_from_week %}<span class="muted block text-xs">Не в итоге недели</span>{% endif %}
                 <span class="muted block truncate text-xs">
                     {{ expense.created_at|date:"j E, H:i" }}
                     {% if expense.category %}· {{ expense.category.name }}{% endif %}
