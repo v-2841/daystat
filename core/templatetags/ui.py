@@ -6,6 +6,11 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
+# genitive, as the chart axes abbreviate them: Django's own short names
+# are nominative («17 май», «17 Март»)
+SHORT_MONTHS = ('янв.', 'февр.', 'мар.', 'апр.', 'мая', 'июн.',
+                'июл.', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.')
+
 
 @register.simple_tag
 def icon(name, classes='icon'):
@@ -26,6 +31,12 @@ def field_class(field, css):
     existing = attrs.pop('class', '')
     attrs['class'] = f'{existing} {css}'.strip()
     return field.as_widget(attrs=attrs)
+
+
+@register.filter
+def short_date(value):
+    """A date as «17 окт.», short enough for a button on a phone."""
+    return f'{value.day} {SHORT_MONTHS[value.month - 1]}'
 
 
 @register.filter

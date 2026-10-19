@@ -92,8 +92,9 @@
             <a class="btn btn-ghost"
                href="{% url 'daystats:daystats' date=yesterday|date:'Y-m-d' %}">
                 {% icon "caret-left" "icon w-5 h-5" %}
+                {# a date, not «Вчера»: the neighbour of an archived day is not yesterday #}
                 <span class="hidden sm:inline">{{ yesterday|date:"j E" }}</span>
-                <span class="sm:hidden">Вчера</span>
+                <span class="sm:hidden">{{ yesterday|short_date }}</span>
             </a>
             {% if not is_today %}
                 <a class="btn btn-ghost" href="{% url 'daystats:day' %}">Сегодня</a>
@@ -102,7 +103,7 @@
                 <a class="btn btn-ghost"
                    href="{% url 'daystats:daystats' date=tomorrow|date:'Y-m-d' %}">
                     <span class="hidden sm:inline">{{ tomorrow|date:"j E" }}</span>
-                    <span class="sm:hidden">Завтра</span>
+                    <span class="sm:hidden">{{ tomorrow|short_date }}</span>
                     {% icon "caret-right" "icon w-5 h-5" %}
                 </a>
             {% else %}
